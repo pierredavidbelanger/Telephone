@@ -1573,6 +1573,12 @@ static void NameserversChanged(SCDynamicStoreRef store,
        [[accountDict objectForKey:kProxyPort] integerValue]];
     }
     
+    if ([accountDict objectForKey:kInbandDTMF] != nil) {
+      [[theAccountController account] setInbandDTMF:[[accountDict objectForKey:kInbandDTMF] boolValue]];
+    } else {
+      [[theAccountController account] setInbandDTMF:NO];
+    }
+    
     [theAccountController setEnabled:YES];
     [theAccountController setSubstitutesPlusCharacter:
      [[accountDict objectForKey:kSubstitutePlusCharacter] boolValue]];
@@ -1948,6 +1954,12 @@ static void NameserversChanged(SCDynamicStoreRef store,
        [accountDict objectForKey:kProxyHost]];
       [[anAccountController account] setProxyPort:
        [[accountDict objectForKey:kProxyPort] integerValue]];
+    }
+    
+    if ([accountDict objectForKey:kInbandDTMF] != nil) {
+      [[anAccountController account] setInbandDTMF:[[accountDict objectForKey:kInbandDTMF] boolValue]];
+    } else {
+      [[anAccountController account] setInbandDTMF:NO];
     }
     
     [anAccountController setEnabled:
