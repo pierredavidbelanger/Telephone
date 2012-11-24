@@ -95,6 +95,10 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
 // Sets up Growl support.
 - (void)setupGrowl;
 
+- (void)setupCoreDataStack;
+
+- (void)cleanupCoreDataStack;
+
 // Installs a callback to monitor system DNS servers changes.
 - (void)installDNSChangesCallback;
 
@@ -133,6 +137,8 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
 @synthesize accountsMenuItems = accountsMenuItems_;
 @synthesize windowMenu = windowMenu_;
 @synthesize preferencesMenuItem = preferencesMenuItem_;
+
+@synthesize moc = moc_;
 
 - (NSArray *)enabledAccountControllers {
     return [[self accountControllers] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"enabled == YES"]];
@@ -410,6 +416,8 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver:self];
     [[NSDistributedNotificationCenter defaultCenter] removeObserver:self];
+    
+    [moc_ release];
     
     [super dealloc];
 }
@@ -913,6 +921,54 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
     } else {
         NSLog(@"Could not load Growl.framework");
     }
+}
+
+- (void)setupCoreDataStack {
+    NSError *error = nil;
+
+    NSBundle *mainBundle = [NSBundle mainBundle];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+
+    NSString *bundleIdentifier = [[mainBundle infoDictionary] objectForKey:@"CFBundleIdentifier"];
+    NSString *bundleName = [[mainBundle infoDictionary] objectForKey:@"CFBundleName"];
+
+    NSURL *applicationSupportDirectoryURL = [[[fileManager URLsForDirectory:NSApplicationSupportDirectory
+                                                                inDomains:NSUserDomainMask] lastObject]
+                                           URLByAppendingPathComponent:bundleIdentifier];
+
+    NSURL *modelURL = [[NSBundle mainBundle] URLForResource:bundleName withExtension:@"momd"];
+
+    NSURL *storeURL = [applicationSupportDirectoryURL
+                     URLByAppendingPathComponent:[NSString stringWithFormat:@"%@.storedata", bundleName]];
+
+    NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:
+                           [NSNumber numberWithBool:YES], NSMigratePersistentStoresAutomaticallyOption,
+                           [NSNumber numberWithBool:YES], NSInferMappingModelAutomaticallyOption,
+                           nil];
+
+    NSManagedObjectModel *mom = [[[NSManagedObjectModel alloc]
+                                initWithContentsOfURL:modelURL] autorelease];
+
+    NSPersistentStoreCoordinator *psc = [[[NSPersistentStoreCoordinator alloc]
+                                        initWithManagedObjectModel:mom] autorelease];
+
+    if (![psc addPersistentStoreWithType:NSSQLiteStoreType
+                         configuration:nil
+                                   URL:storeURL
+                               options:options
+                                 error:&error])
+        [[NSApplication sharedApplication] presentError:error];
+
+    moc_ = [[NSManagedObjectContext alloc] init];
+    [moc_ setPersistentStoreCoordinator:psc];
+}
+
+- (void)cleanupCoreDataStack {
+    if (![moc_ hasChanges])
+        return;
+    NSError *error = nil;
+    if (![moc_ save:&error])
+        NSLog(@"Unable to properly cleanup CoreData: error while saving context: %@", error);
 }
 
 - (void)installDNSChangesCallback {
@@ -1608,6 +1664,8 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
 
 // Application control starts here.
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+    [self setupCoreDataStack];
+    
     NSBundle *mainBundle = [NSBundle mainBundle];
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     
@@ -1840,6 +1898,8 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
         // AKSIPUserAgentDidFinishStoppingNotification.
         return NSTerminateLater;
     }
+    
+    [self cleanupCoreDataStack];
     
     return NSTerminateNow;
 }
