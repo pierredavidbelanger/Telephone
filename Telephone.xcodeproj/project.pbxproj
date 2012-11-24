@@ -23,6 +23,8 @@
 
 /* Begin PBXBuildFile section */
 		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
+		2B3A690F1661424300D8EAE3 /* CallLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 2B3A690E1661424300D8EAE3 /* CallLog.m */; };
+		2B3A69131661425F00D8EAE3 /* Telephone.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 2B3A69111661425F00D8EAE3 /* Telephone.xcdatamodeld */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -147,6 +149,9 @@
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		2B3A690D1661424300D8EAE3 /* CallLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CallLog.h; sourceTree = "<group>"; };
+		2B3A690E1661424300D8EAE3 /* CallLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CallLog.m; sourceTree = "<group>"; };
+		2B3A69121661425F00D8EAE3 /* Telephone.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Telephone.xcdatamodel; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* Telephone_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Telephone_Prefix.pch; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Telephone-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Telephone-Info.plist"; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Telephone.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Telephone.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -454,6 +459,7 @@
 				AA2ED9AB0F05BA11004A13C6 /* AccountSetup.xib */,
 				AA53434612ADBAD200B47767 /* Sound.tiff */,
 				AA51FC6E0F1D6700003CE94C /* Growl Registration Ticket.growlRegDict */,
+				2B3A69111661425F00D8EAE3 /* Telephone.xcdatamodeld */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -613,6 +619,8 @@
 				AA8A5D2B0E91262500DB43C8 /* AKKeychain.m */,
 				AAAC618A0FE6A42900FBE053 /* AKNetworkReachability.h */,
 				AAAC618B0FE6A42900FBE053 /* AKNetworkReachability.m */,
+				2B3A690D1661424300D8EAE3 /* CallLog.h */,
+				2B3A690E1661424300D8EAE3 /* CallLog.m */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -800,6 +808,8 @@
 				AA86C86110FF928D00EF4E8A /* ActiveCallTransferViewController.m in Sources */,
 				AA0693B0110228E4007EF898 /* ActiveAccountTransferViewController.m in Sources */,
 				AAA810B41115D7F9008CA945 /* EndedCallTransferViewController.m in Sources */,
+				2B3A690F1661424300D8EAE3 /* CallLog.m in Sources */,
+				2B3A69131661425F00D8EAE3 /* Telephone.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1359,6 +1369,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		2B3A69111661425F00D8EAE3 /* Telephone.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				2B3A69121661425F00D8EAE3 /* Telephone.xcdatamodel */,
+			);
+			currentVersion = 2B3A69121661425F00D8EAE3 /* Telephone.xcdatamodel */;
+			path = Telephone.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 29B97313FDCFA39411CA2CEA /* Project object */;
 }
