@@ -51,6 +51,7 @@
 #import "IncomingCallViewController.h"
 #import "PreferencesController.h"
 
+#import "CallLog.h"
 
 NSString * const AKCallWindowWillCloseNotification = @"AKCallWindowWillClose";
 
@@ -64,6 +65,10 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
 
 // Closes call window.
 - (void)closeCallWindow;
+
+- (void)logCallBegin;
+- (void)logCallUpdate;
+- (void)logCallEnd;
 
 @end
 
@@ -164,6 +169,9 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
         return nil;
     }
     
+    moc_ = [[[NSApp delegate] moc] retain];
+    callLog_ = nil;
+    
     [self setIdentifier:[NSString ak_uuidString]];
     [self setAccountController:anAccountController];
     [self setCallOnHold:NO];
@@ -193,6 +201,9 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
     [enteredCallDestination_ release];
     [redialURI_ release];
     
+    [callLog_ release];
+    [moc_ release];
+    
     [super dealloc];
 }
 
@@ -212,6 +223,8 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
 }
 
 - (void)hangUpCall {
+    [self logCallEnd];
+    
     [self setCallActive:NO];
     [self setCallUnhandled:NO];
     
@@ -402,6 +415,74 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
     }
 }
 
+- (void)logCallBegin {
+    if (callLog_)
+        return;
+
+    if (![[NSUserDefaults standardUserDefaults] boolForKey:kLogCall])
+        return;
+
+    AKSIPCall *call = [self call];
+
+    callLog_ = [NSEntityDescription insertNewObjectForEntityForName:[[CallLog class] description]
+                                             inManagedObjectContext:moc_];
+    [callLog_ setAccount:[[[self accountController] account] SIPAddress]];
+    if ([[self nameFromAddressBook] length] > 0)
+        [callLog_ setRemoteName:[self nameFromAddressBook]];
+    else
+        [callLog_ setRemoteName:[self displayedName]];
+    if ([[self enteredCallDestination] length] > 0)
+        [callLog_ setRemotePhone:[self enteredCallDestination]];
+    else
+        [callLog_ setRemotePhone:[[call remoteURI] user]];
+    [callLog_ setRemoteURI:[[self redialURI] description]];
+    [callLog_ setInbound:[call isIncoming]];
+    [callLog_ setDatetime:[NSDate date]];
+    [callLog_ setDurationInSecond:0];
+    [callLog_ setSipStatusCode:[call lastStatus]];
+    [callLog_ setMissed:NO];
+
+    NSError *error;
+    if (![moc_ save:&error])
+        NSLog(@"Error while saving CoreData context: %@", error);
+}
+
+- (void)logCallUpdate {
+    if (!callLog_)
+        return;
+
+    AKSIPCall *call = [self call];
+
+    [callLog_ setSipStatusCode:[call lastStatus]];
+
+    NSError *error;
+    if (![moc_ save:&error])
+        NSLog(@"Error while saving CoreData context: %@", error);
+}
+
+- (void)logCallEnd {
+    if (!callLog_)
+        return;
+
+    AKSIPCall *call = [self call];
+
+    NSInteger seconds = 0;
+    if ([call lastStatus] == PJSIP_SC_OK) {
+        NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
+        seconds = (NSInteger)(now - [self callStartTime]);
+    }
+
+    [callLog_ setDurationInSecond:seconds];
+    [callLog_ setSipStatusCode:[call lastStatus]];
+    [callLog_ setMissed:[self isCallUnhandled]];
+
+    NSError *error;
+    if (![moc_ save:&error])
+        NSLog(@"Error while saving CoreData context: %@", error);
+
+    [callLog_ release];
+    callLog_ = nil;
+}
 
 #pragma mark -
 #pragma mark NSWindow delegate methods
@@ -414,6 +495,8 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
         superWindowWillClose(self, _cmd);
     }
     if ([self isCallActive]) {
+        [self logCallEnd];
+        
         [self setCallActive:NO];
         [[self activeCallViewController] stopCallTimer];
         
@@ -441,6 +524,8 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
 #pragma mark AKSIPCall notifications
 
 - (void)SIPCallCalling:(NSNotification *)notification {
+    [self logCallBegin];
+    
     if ([[self phoneLabelFromAddressBook] length] > 0) {
         [self setStatus:
          [NSString stringWithFormat:
@@ -462,6 +547,9 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
 }
 
 - (void)SIPCallEarly:(NSNotification *)notification {
+    [self logCallBegin];
+    [self logCallUpdate];
+    
     [[NSApp delegate] pauseITunes];
     
     NSNumber *sipEventCode = [[notification userInfo] objectForKey:@"AKSIPEventCode"];
@@ -491,6 +579,8 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
 }
 
 - (void)SIPCallDidConfirm:(NSNotification *)notification {
+    [self logCallUpdate];
+    
     [self setCallStartTime:[NSDate timeIntervalSinceReferenceDate]];
     [[NSApp delegate] pauseITunes];
     
@@ -524,6 +614,8 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
 }
 
 - (void)SIPCallDidDisconnect:(NSNotification *)notification {
+    [self logCallEnd];
+    
     [self setCallActive:NO];
     [[self activeCallViewController] stopCallTimer];
     
