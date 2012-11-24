@@ -23,8 +23,17 @@
 
 /* Begin PBXBuildFile section */
 		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
+		2B229BB81661BAF700FDFA61 /* CallLogStatusToImageValueTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2B229BB71661BAF700FDFA61 /* CallLogStatusToImageValueTransformer.m */; };
 		2B3A690F1661424300D8EAE3 /* CallLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 2B3A690E1661424300D8EAE3 /* CallLog.m */; };
 		2B3A69131661425F00D8EAE3 /* Telephone.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 2B3A69111661425F00D8EAE3 /* Telephone.xcdatamodeld */; };
+		2B3A69251661526000D8EAE3 /* CallLog.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2B3A69241661526000D8EAE3 /* CallLog.xib */; };
+		2B3A692B1661535E00D8EAE3 /* call-inbound-missed.png in Resources */ = {isa = PBXBuildFile; fileRef = 2B3A69271661535E00D8EAE3 /* call-inbound-missed.png */; };
+		2B3A692C1661535E00D8EAE3 /* call-inbound.png in Resources */ = {isa = PBXBuildFile; fileRef = 2B3A69281661535E00D8EAE3 /* call-inbound.png */; };
+		2B3A692D1661535E00D8EAE3 /* call-outbound-missed.png in Resources */ = {isa = PBXBuildFile; fileRef = 2B3A69291661535E00D8EAE3 /* call-outbound-missed.png */; };
+		2B3A692E1661535E00D8EAE3 /* call-outbound.png in Resources */ = {isa = PBXBuildFile; fileRef = 2B3A692A1661535E00D8EAE3 /* call-outbound.png */; };
+		2B3A69361661554B00D8EAE3 /* DurationFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 2B3A69321661554B00D8EAE3 /* DurationFormatter.m */; };
+		2B3A69371661554B00D8EAE3 /* SIPStatusCodeFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 2B3A69341661554B00D8EAE3 /* SIPStatusCodeFormatter.m */; };
+		2B3A693B1661556F00D8EAE3 /* CallLogController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2B3A693A1661556F00D8EAE3 /* CallLogController.m */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -149,9 +158,22 @@
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		2B229BB61661BAF700FDFA61 /* CallLogStatusToImageValueTransformer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CallLogStatusToImageValueTransformer.h; sourceTree = "<group>"; };
+		2B229BB71661BAF700FDFA61 /* CallLogStatusToImageValueTransformer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CallLogStatusToImageValueTransformer.m; sourceTree = "<group>"; };
 		2B3A690D1661424300D8EAE3 /* CallLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CallLog.h; sourceTree = "<group>"; };
 		2B3A690E1661424300D8EAE3 /* CallLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CallLog.m; sourceTree = "<group>"; };
 		2B3A69121661425F00D8EAE3 /* Telephone.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Telephone.xcdatamodel; sourceTree = "<group>"; };
+		2B3A69241661526000D8EAE3 /* CallLog.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CallLog.xib; sourceTree = "<group>"; };
+		2B3A69271661535E00D8EAE3 /* call-inbound-missed.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "call-inbound-missed.png"; sourceTree = "<group>"; };
+		2B3A69281661535E00D8EAE3 /* call-inbound.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "call-inbound.png"; sourceTree = "<group>"; };
+		2B3A69291661535E00D8EAE3 /* call-outbound-missed.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "call-outbound-missed.png"; sourceTree = "<group>"; };
+		2B3A692A1661535E00D8EAE3 /* call-outbound.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "call-outbound.png"; sourceTree = "<group>"; };
+		2B3A69311661554B00D8EAE3 /* DurationFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DurationFormatter.h; sourceTree = "<group>"; };
+		2B3A69321661554B00D8EAE3 /* DurationFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DurationFormatter.m; sourceTree = "<group>"; };
+		2B3A69331661554B00D8EAE3 /* SIPStatusCodeFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SIPStatusCodeFormatter.h; sourceTree = "<group>"; };
+		2B3A69341661554B00D8EAE3 /* SIPStatusCodeFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SIPStatusCodeFormatter.m; sourceTree = "<group>"; };
+		2B3A69391661556F00D8EAE3 /* CallLogController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CallLogController.h; sourceTree = "<group>"; };
+		2B3A693A1661556F00D8EAE3 /* CallLogController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CallLogController.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* Telephone_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Telephone_Prefix.pch; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Telephone-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Telephone-Info.plist"; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Telephone.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Telephone.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -443,6 +465,7 @@
 				AA2ED99B0F05B362004A13C6 /* Account.xib */,
 				AA34ACC2106E229A00FA38F7 /* ActiveAccountView.xib */,
 				AA2ED99F0F05B3B5004A13C6 /* Call.xib */,
+				2B3A69241661526000D8EAE3 /* CallLog.xib */,
 				AADAA2C2107E569200789F2D /* IncomingCallView.xib */,
 				AADAA2CC107E56FD00789F2D /* ActiveCallView.xib */,
 				AADAA2D0107E572300789F2D /* EndedCallView.xib */,
@@ -458,6 +481,10 @@
 				AA2ED9B10F05BB5D004A13C6 /* AuthenticationFailure.xib */,
 				AA2ED9AB0F05BA11004A13C6 /* AccountSetup.xib */,
 				AA53434612ADBAD200B47767 /* Sound.tiff */,
+				2B3A69271661535E00D8EAE3 /* call-inbound-missed.png */,
+				2B3A69281661535E00D8EAE3 /* call-inbound.png */,
+				2B3A69291661535E00D8EAE3 /* call-outbound-missed.png */,
+				2B3A692A1661535E00D8EAE3 /* call-outbound.png */,
 				AA51FC6E0F1D6700003CE94C /* Growl Registration Ticket.growlRegDict */,
 				2B3A69111661425F00D8EAE3 /* Telephone.xcdatamodeld */,
 			);
@@ -471,6 +498,15 @@
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		2B3A69381661555800D8EAE3 /* CallLog */ = {
+			isa = PBXGroup;
+			children = (
+				2B3A69391661556F00D8EAE3 /* CallLogController.h */,
+				2B3A693A1661556F00D8EAE3 /* CallLogController.m */,
+			);
+			name = CallLog;
 			sourceTree = "<group>";
 		};
 		AA6089C012E25C7700DC44DC /* AddressBook */ = {
@@ -509,6 +545,7 @@
 				AA4BD4D70E07C305005A71B2 /* AppController.m */,
 				AADAA302107E5AA200789F2D /* Account */,
 				AADAA2FF107E59FC00789F2D /* Call */,
+				2B3A69381661555800D8EAE3 /* CallLog */,
 				AA86C8B6110339E200EF4E8A /* Call Transfer */,
 				AADAA303107E5AD400789F2D /* Preferences */,
 				AAFA9B1B0EE1D8FC009A45CB /* AKSIPURIFormatter.h */,
@@ -523,6 +560,12 @@
 				AA8FBAA110A56BD9000946F3 /* XSViewController.m */,
 				AA8FBAA210A56BD9000946F3 /* XSWindowController.h */,
 				AA8FBAA310A56BD9000946F3 /* XSWindowController.m */,
+				2B229BB61661BAF700FDFA61 /* CallLogStatusToImageValueTransformer.h */,
+				2B229BB71661BAF700FDFA61 /* CallLogStatusToImageValueTransformer.m */,
+				2B3A69311661554B00D8EAE3 /* DurationFormatter.h */,
+				2B3A69321661554B00D8EAE3 /* DurationFormatter.m */,
+				2B3A69331661554B00D8EAE3 /* SIPStatusCodeFormatter.h */,
+				2B3A69341661554B00D8EAE3 /* SIPStatusCodeFormatter.m */,
 			);
 			name = "View and Controller";
 			sourceTree = "<group>";
@@ -744,6 +787,11 @@
 				AA7CB528114423A4004D79DA /* ActiveCallTransferView.xib in Resources */,
 				AA7CB5301144242F004D79DA /* EndedCallTransferView.xib in Resources */,
 				AA53434712ADBAD200B47767 /* Sound.tiff in Resources */,
+				2B3A69251661526000D8EAE3 /* CallLog.xib in Resources */,
+				2B3A692B1661535E00D8EAE3 /* call-inbound-missed.png in Resources */,
+				2B3A692C1661535E00D8EAE3 /* call-inbound.png in Resources */,
+				2B3A692D1661535E00D8EAE3 /* call-outbound-missed.png in Resources */,
+				2B3A692E1661535E00D8EAE3 /* call-outbound.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -810,6 +858,10 @@
 				AAA810B41115D7F9008CA945 /* EndedCallTransferViewController.m in Sources */,
 				2B3A690F1661424300D8EAE3 /* CallLog.m in Sources */,
 				2B3A69131661425F00D8EAE3 /* Telephone.xcdatamodeld in Sources */,
+				2B3A69361661554B00D8EAE3 /* DurationFormatter.m in Sources */,
+				2B3A69371661554B00D8EAE3 /* SIPStatusCodeFormatter.m in Sources */,
+				2B3A693B1661556F00D8EAE3 /* CallLogController.m in Sources */,
+				2B229BB81661BAF700FDFA61 /* CallLogStatusToImageValueTransformer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
