@@ -51,6 +51,7 @@
 #import "ActiveAccountViewController.h"
 #import "AuthenticationFailureController.h"
 #import "CallController.h"
+#import "CallLogController.h"
 #import "PreferencesController.h"
 
 
@@ -113,6 +114,7 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
 
 @synthesize userAgent = userAgent_;
 @synthesize accountControllers = accountControllers_;
+@synthesize callLogController = callLogController_;
 @dynamic enabledAccountControllers;
 @dynamic preferencesController;
 @dynamic accountSetupController;
@@ -406,6 +408,8 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
     }
     [preferencesController_ release];
     
+    [callLogController_ release];
+    
     [audioDevices_ release];
     [ringtone_ release];
     
@@ -688,6 +692,13 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
     }
     
     [[self preferencesController] showWindow:nil];
+}
+
+- (IBAction)showCallLogWindow:(id)sender
+{
+    if (!callLogController_)
+        callLogController_ = [[CallLogController alloc] initWithWindowNibName:@"CallLog"];
+    [callLogController_ showWindow:nil];
 }
 
 - (IBAction)addAccountOnFirstLaunch:(id)sender {

@@ -46,7 +46,7 @@ extern NSString * const kGrowlNotificationIncomingCall;
 extern NSString * const kGrowlNotificationCallEnded;
 
 @class AKSIPUserAgent, PreferencesController, CallController;
-@class AccountSetupController;
+@class AccountSetupController, CallLogController;
 
 // Application controller and NSApplication delegate.
 @interface AppController : NSObject <AKSIPUserAgentDelegate, GrowlApplicationBridgeDelegate> {
@@ -55,6 +55,7 @@ extern NSString * const kGrowlNotificationCallEnded;
     NSMutableArray *accountControllers_;
     PreferencesController *preferencesController_;
     AccountSetupController *accountSetupController_;
+    CallLogController *callLogController_;
     NSArray *audioDevices_;
     NSInteger soundInputDeviceIndex_;
     NSInteger soundOutputDeviceIndex_;
@@ -90,6 +91,9 @@ extern NSString * const kGrowlNotificationCallEnded;
 
 // Account setup controller.
 @property (nonatomic, readonly) AccountSetupController *accountSetupController;
+
+// CallLog controller.
+@property (nonatomic, readonly) CallLogController *callLogController;
 
 // An array of audio devices available in the system.
 @property (retain) NSArray *audioDevices;
@@ -169,6 +173,9 @@ extern NSString * const kGrowlNotificationCallEnded;
 
 // Shows preferences window.
 - (IBAction)showPreferencePanel:(id)sender;
+
+// Shows CallLog window.
+- (IBAction)showCallLogWindow:(id)sender;
 
 // Adds an account on first application launch.
 - (IBAction)addAccountOnFirstLaunch:(id)sender;
