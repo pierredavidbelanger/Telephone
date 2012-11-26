@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="1811" systemVersion="12C60" minimumToolsVersion="Xcode 4.1" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="CallLog" representedClassName="CallLog" syncable="YES">
+        <attribute name="account" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="datetime" optional="YES" attributeType="Date" indexed="YES" syncable="YES"/>
+        <attribute name="durationInSecond" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="inbound" attributeType="Boolean" syncable="YES"/>
+        <attribute name="missed" attributeType="Boolean" syncable="YES"/>
+        <attribute name="remoteLabel" optional="YES" transient="YES" attributeType="String" syncable="YES"/>
+        <attribute name="remoteName" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="remotePhone" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="remoteURI" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="sipStatusCode" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="status" transient="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="CallLog" positionX="160" positionY="192" width="128" height="210"/>
+    </elements>
+</model>
