@@ -134,6 +134,7 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
 @dynamic currentNameservers;
 @synthesize didPauseITunes = didPauseITunes_;
 @synthesize didPauseRdio = didPauseRdio_;
+@synthesize didPauseRadio = didPauseRadio_;
 @synthesize shouldPresentUserAgentLaunchError = shouldPresentUserAgentLaunchError_;
 @dynamic unhandledIncomingCallsCount;
 @synthesize userAttentionTimer = userAttentionTimer_;
@@ -787,6 +788,15 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
         return;
     }
     
+    SBApplication *radio = [SBApplication applicationWithBundleIdentifier:@"ca.pjer.Radio"];
+    if ([radio isRunning]) {
+        BOOL r = [radio performSelector:@selector(isPlaying)];
+        if (r) {
+            [radio performSelector:@selector(pause)];
+            self.didPauseRadio = YES;
+        }
+    }
+    
     RdioApplication *rdio = [SBApplication applicationWithBundleIdentifier:@"com.rdio.desktop"];
     if ([rdio isRunning] && rdio.playerState == RdioEPSSPlaying) {
         [rdio playpause];
@@ -808,6 +818,15 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
 - (void)resumeITunesIfNeeded {
     if (![[NSUserDefaults standardUserDefaults] boolForKey:kPauseITunes]) {
         return;
+    }
+    
+    SBApplication *radio = [SBApplication applicationWithBundleIdentifier:@"ca.pjer.Radio"];
+    if ([radio isRunning] && self.didPauseRadio && ![self hasActiveCallControllers]) {
+        BOOL r = [radio performSelector:@selector(isPaused)];
+        if (r) {
+            [radio performSelector:@selector(play)];
+        }
+        self.didPauseRadio = NO;
     }
     
     RdioApplication *rdio = [SBApplication applicationWithBundleIdentifier:@"com.rdio.desktop"];

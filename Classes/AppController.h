@@ -68,6 +68,7 @@ extern NSString * const kGrowlNotificationCallEnded;
     BOOL terminating_;
     BOOL didPauseITunes_;
     BOOL didPauseRdio_;
+    BOOL didPauseRadio_;
     BOOL shouldPresentUserAgentLaunchError_;
     NSTimer *userAttentionTimer_;
     
@@ -140,6 +141,7 @@ extern NSString * const kGrowlNotificationCallEnded;
 // A Boolean value indicating whether the receiver has paused iTunes.
 @property (nonatomic, assign) BOOL didPauseITunes;
 @property (nonatomic, assign) BOOL didPauseRdio;
+@property (nonatomic, assign) BOOL didPauseRadio;
 
 // A Boolean value indicating whether user agent launch error should be presented to the user.
 @property (nonatomic, assign) BOOL shouldPresentUserAgentLaunchError;
