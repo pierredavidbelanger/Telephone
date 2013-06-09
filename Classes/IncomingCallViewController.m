@@ -38,11 +38,6 @@
 
 @synthesize callController = callController_;
 
-@synthesize displayedNameField = displayedNameField_;
-@synthesize statusField = statusField_;
-@synthesize acceptCallButton = acceptCallButton_;
-@synthesize declineCallButton = declineCallButton_;
-
 - (id)initWithCallController:(CallController *)callController {
     self = [super initWithNibName:@"IncomingCallView" bundle:nil windowController:callController];
     
@@ -53,19 +48,9 @@
 }
 
 - (id)init {
-    [self dealloc];
     NSString *reason = @"Initialize IncomingCallViewController with initWithCallController:";
     @throw [NSException exceptionWithName:@"AKBadInitCall" reason:reason userInfo:nil];
     return nil;
-}
-
-- (void)dealloc {
-    [displayedNameField_ release];
-    [statusField_ release];
-    [acceptCallButton_ release];
-    [declineCallButton_ release];
-    
-    [super dealloc];
 }
 
 - (void)removeObservations {

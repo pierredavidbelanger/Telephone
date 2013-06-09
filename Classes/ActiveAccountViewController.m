@@ -48,16 +48,11 @@ NSString * const kPhoneLabel = @"PhoneLabel";
 
 @implementation ActiveAccountViewController
 
-@synthesize accountController = accountController_;
-@synthesize callDestinationField = callDestinationField_;
-@synthesize callDestinationURIIndex = callDestinationURIIndex_;
-@dynamic callDestinationURI;
-
 - (AKSIPURI *)callDestinationURI {
     NSDictionary *callDestinationDict = [[[[self callDestinationField] objectValue] objectAtIndex:0]
                                          objectAtIndex:[self callDestinationURIIndex]];
     
-    AKSIPURI *uri = [[[callDestinationDict objectForKey:kURI] copy] autorelease];
+    AKSIPURI *uri = [[callDestinationDict objectForKey:kURI] copy];
     
     // Displayed name is stored in the first URI only.
     AKSIPURI *firstURI = [[[[[self callDestinationField] objectValue] objectAtIndex:0] objectAtIndex:0]
@@ -84,7 +79,6 @@ NSString * const kPhoneLabel = @"PhoneLabel";
 }
 
 - (id)init {
-    [self dealloc];
     NSString *reason = @"Initialize ActiveAccountViewController with initWithAccountController:";
     @throw [NSException exceptionWithName:@"AKBadInitCall" reason:reason userInfo:nil];
     return nil;
@@ -180,8 +174,8 @@ NSString * const kPhoneLabel = @"PhoneLabel";
     // If entered substring consists of several words separated by spaces,
     // add searches for all possible combinations of the first and the last names.
     for (NSUInteger i = 0; i < [substringComponents count] - 1; ++i) {
-        NSMutableString *firstPart = [[[NSMutableString alloc] init] autorelease];
-        NSMutableString *secondPart = [[[NSMutableString alloc] init] autorelease];
+        NSMutableString *firstPart = [[NSMutableString alloc] init];
+        NSMutableString *secondPart = [[NSMutableString alloc] init];
         NSUInteger j;
         
         for (j = 0; j <= i; ++j) {
@@ -502,7 +496,7 @@ NSString * const kPhoneLabel = @"PhoneLabel";
         [tokenField setTokenStyle:NSPlainTextTokenStyle];
     }
     
-    return [[completions copy] autorelease];
+    return [completions copy];
 }
 
 // Converts input text to the array of dictionaries containing AKSIPURIs and phone labels (mobile, home, etc).
@@ -511,7 +505,7 @@ NSString * const kPhoneLabel = @"PhoneLabel";
 - (id)tokenField:(NSTokenField *)tokenField representedObjectForEditingString:(NSString *)editingString {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     
-    AKSIPURIFormatter *SIPURIFormatter = [[[AKSIPURIFormatter alloc] init] autorelease];
+    AKSIPURIFormatter *SIPURIFormatter = [[AKSIPURIFormatter alloc] init];
     [SIPURIFormatter setFormatsTelephoneNumbers:[defaults boolForKey:kFormatTelephoneNumbers]];
     [SIPURIFormatter setTelephoneNumberFormatterSplitsLastFourDigits:
      [defaults boolForKey:kTelephoneNumberFormatterSplitsLastFourDigits]];
@@ -542,7 +536,7 @@ NSString * const kPhoneLabel = @"PhoneLabel";
     
     NSString *displayedName = [theURI displayName];
     if ([displayedName length] > 0) {
-        NSMutableArray *searchElements = [[[NSMutableArray alloc] init] autorelease];
+        NSMutableArray *searchElements = [[NSMutableArray alloc] init];
         
         // displayedName matches the first name.
         ABSearchElement *firstNameMatch
@@ -599,8 +593,8 @@ NSString * const kPhoneLabel = @"PhoneLabel";
         // Add person searches for all combination of displayedName components separated by space.
         NSArray *displayedNameComponents = [displayedName componentsSeparatedByString:@" "];
         for (NSUInteger i = 0; i < [displayedNameComponents count] - 1; ++i) {
-            NSMutableString *firstPart = [[[NSMutableString alloc] init] autorelease];
-            NSMutableString *secondPart = [[[NSMutableString alloc] init] autorelease];
+            NSMutableString *firstPart = [[NSMutableString alloc] init];
+            NSMutableString *secondPart = [[NSMutableString alloc] init];
             NSUInteger j;
             
             for (j = 0; j <= i; ++j) {
@@ -717,7 +711,7 @@ NSString * const kPhoneLabel = @"PhoneLabel";
         recordsFound = [AB recordsMatchingSearchElement:phoneNumberMatch];
     }
     
-    NSMutableArray *callDestinations = [[[NSMutableArray alloc] init] autorelease];
+    NSMutableArray *callDestinations = [[NSMutableArray alloc] init];
     NSUInteger destinationIndex = 0;
     
     if ([recordsFound count] > 0) {
@@ -728,7 +722,7 @@ NSString * const kPhoneLabel = @"PhoneLabel";
         }
         
         // Get phones.
-        AKTelephoneNumberFormatter *telephoneNumberFormatter = [[[AKTelephoneNumberFormatter alloc] init] autorelease];
+        AKTelephoneNumberFormatter *telephoneNumberFormatter = [[AKTelephoneNumberFormatter alloc] init];
         ABMultiValue *phones = [theRecord valueForProperty:kABPhoneProperty];
         for (NSUInteger i = 0; i < [phones count]; ++i) {
             NSString *phoneNumber = [phones valueAtIndex:i];
@@ -791,7 +785,7 @@ NSString * const kPhoneLabel = @"PhoneLabel";
     // First URI in the array is the default call destination.
     [self setCallDestinationURIIndex:destinationIndex];
     
-    return [[callDestinations copy] autorelease];
+    return [callDestinations copy];
 }
 
 - (NSString *)tokenField:(NSTokenField *)tokenField displayStringForRepresentedObject:(id)representedObject {
@@ -816,7 +810,7 @@ NSString * const kPhoneLabel = @"PhoneLabel";
         
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         if ([[uri user] ak_isTelephoneNumber] && [defaults boolForKey:kFormatTelephoneNumbers]) {
-            AKTelephoneNumberFormatter *formatter = [[[AKTelephoneNumberFormatter alloc] init] autorelease];
+            AKTelephoneNumberFormatter *formatter = [[AKTelephoneNumberFormatter alloc] init];
             [formatter setSplitsLastFourDigits:[defaults boolForKey:kTelephoneNumberFormatterSplitsLastFourDigits]];
             returnString = [formatter stringForObjectValue:[uri user]];
             
@@ -866,16 +860,16 @@ NSString * const kPhoneLabel = @"PhoneLabel";
 }
 
 - (NSMenu *)tokenField:(NSTokenField *)tokenField menuForRepresentedObject:(id)representedObject {
-    NSMenu *tokenMenu = [[[NSMenu alloc] init] autorelease];
+    NSMenu *tokenMenu = [[NSMenu alloc] init];
     
     for (NSUInteger i = 0; i < [representedObject count]; ++i) {
         AKSIPURI *uri = [[representedObject objectAtIndex:i] objectForKey:kURI];
         
         NSString *phoneLabel = [[representedObject objectAtIndex:i] objectForKey:kPhoneLabel];
         
-        NSMenuItem *menuItem = [[[NSMenuItem alloc] init] autorelease];
+        NSMenuItem *menuItem = [[NSMenuItem alloc] init];
         
-        AKTelephoneNumberFormatter *formatter = [[[AKTelephoneNumberFormatter alloc] init] autorelease];
+        AKTelephoneNumberFormatter *formatter = [[AKTelephoneNumberFormatter alloc] init];
         [formatter setSplitsLastFourDigits:
          [[NSUserDefaults standardUserDefaults] boolForKey:kTelephoneNumberFormatterSplitsLastFourDigits]];
         

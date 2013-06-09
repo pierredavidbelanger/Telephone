@@ -49,41 +49,19 @@ extern NSString * const kEmailSIPLabel;
 @class CallTransferController;
 
 // A SIP account controller.
-@interface AccountController : XSWindowController <AKSIPAccountDelegate> {
-  @private
-    BOOL enabled_;
-    AKSIPAccount *account_;
-    NSMutableArray *callControllers_;
-    NSString *accountDescription_;
-    BOOL attemptingToRegisterAccount_;
-    BOOL attemptingToUnregisterAccount_;
-    BOOL shouldPresentRegistrationError_;
-    BOOL accountUnavailable_;
-    NSTimer *reRegistrationTimer_;
-    BOOL shouldMakeCall_;
-    NSString *catchedURLString_;
-    AKNetworkReachability *registrarReachability_;
-    
-    BOOL substitutesPlusCharacter_;
-    NSString *plusCharacterSubstitution_;
-    
-    ActiveAccountViewController *activeAccountViewController_;
-    AuthenticationFailureController *authenticationFailureController_;
-    
-    NSPopUpButton *accountStatePopUp_;
-}
+@interface AccountController : XSWindowController <AKSIPAccountDelegate>
 
 // A Boolean value indicating whether receiver is enabled.
 @property (nonatomic, assign, getter=isEnabled) BOOL enabled;
 
 // A SIP account the receiver controls.
-@property (nonatomic, retain) AKSIPAccount *account;
+@property (nonatomic, strong) AKSIPAccount *account;
 
 // A Boolean value indicating whether account is registered.
 @property (nonatomic, assign, getter=isAccountRegistered) BOOL accountRegistered;
 
 // An array of call controllers managed by the receiver.
-@property (nonatomic, retain) NSMutableArray *callControllers;
+@property (nonatomic, strong) NSMutableArray *callControllers;
 
 // Account description.
 @property (nonatomic, copy) NSString *accountDescription;
@@ -109,7 +87,7 @@ extern NSString * const kEmailSIPLabel;
 @property (nonatomic, copy) NSString *catchedURLString;
 
 // Registrar network reachability. When registrar becomes reachable, we try to register the receiver's account.
-@property (nonatomic, retain) AKNetworkReachability *registrarReachability;
+@property (nonatomic, strong) AKNetworkReachability *registrarReachability;
 
 // A Boolean value indicating whether a plus character at the beginning of the phone number to be dialed should be
 // replaced.
@@ -125,7 +103,7 @@ extern NSString * const kEmailSIPLabel;
 @property (nonatomic, readonly) AuthenticationFailureController *authenticationFailureController;
 
 // Account state pop-up button outlet.
-@property (nonatomic, retain) IBOutlet NSPopUpButton *accountStatePopUp;
+@property (nonatomic, weak) IBOutlet NSPopUpButton *accountStatePopUp;
 
 
 // Designated initializer.

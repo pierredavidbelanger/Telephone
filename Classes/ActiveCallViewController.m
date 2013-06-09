@@ -41,43 +41,20 @@
 
 @implementation ActiveCallViewController
 
-@synthesize callController = callController_;
-@synthesize callTimer = callTimer_;
-@synthesize enteredDTMF = enteredDTMF_;
-@synthesize callProgressIndicatorTrackingArea = callProgressIndicatorTrackingArea_;
-
-@synthesize displayedNameField = displayedNameField_;
-@synthesize statusField = statusField_;
-@synthesize callProgressIndicator = callProgressIndicator_;
-@synthesize hangUpButton = hangUpButton_;
-
 - (id)initWithNibName:(NSString *)nibName callController:(CallController *)callController {
     self = [super initWithNibName:nibName bundle:nil windowController:callController];
     
     if (self != nil) {
-        enteredDTMF_ = [[NSMutableString alloc] init];
+        _enteredDTMF = [[NSMutableString alloc] init];
         [self setCallController:callController];
     }
     return self;
 }
 
 - (id)init {
-    [self dealloc];
     NSString *reason = @"Initialize ActiveCallViewController with initWithCallController:";
     @throw [NSException exceptionWithName:@"AKBadInitCall" reason:reason userInfo:nil];
     return nil;
-}
-
-- (void)dealloc {
-    [enteredDTMF_ release];
-    [callProgressIndicatorTrackingArea_ release];
-    
-    [displayedNameField_ release];
-    [statusField_ release];
-    [callProgressIndicator_ release];
-    [hangUpButton_ release];
-    
-    [super dealloc];
 }
 
 - (void)removeObservations {
@@ -103,11 +80,10 @@
     
     NSUInteger trackingOptions = NSTrackingMouseEnteredAndExited | NSTrackingActiveAlways;
     
-    NSTrackingArea *trackingArea = [[[NSTrackingArea alloc] initWithRect:trackingRect
+    NSTrackingArea *trackingArea = [[NSTrackingArea alloc] initWithRect:trackingRect
                                                                  options:trackingOptions
                                                                    owner:self
-                                                                userInfo:nil]
-                                    autorelease];
+                                                                userInfo:nil];
     
     [[self view] addTrackingArea:trackingArea];
     [self setCallProgressIndicatorTrackingArea:trackingArea];
@@ -169,14 +145,11 @@
     
     if (seconds < 3600) {
         [[self callController] setStatus:[NSString stringWithFormat:@"%02ld:%02ld",
-                                          (unsigned long)((seconds / 60) % 60),
-                                          (unsigned long)(seconds % 60)]];
+                                          (seconds / 60) % 60, seconds % 60]];
     } else {
         [[self callController]
          setStatus:[NSString stringWithFormat:@"%02ld:%02ld:%02ld",
-                    (unsigned long)((seconds / 3600) % 24),
-                    (unsigned long)((seconds / 60) % 60),
-                    (unsigned long)(seconds % 60)]];
+                    (seconds / 3600) % 24, (seconds / 60) % 60, seconds % 60]];
     }
 }
 

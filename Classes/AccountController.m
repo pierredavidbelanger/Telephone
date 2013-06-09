@@ -83,7 +83,7 @@ NSString * const kEmailSIPLabel = @"sip";
 @interface AccountController ()
 
 // Timer for account re-registration in case of registration error.
-@property (nonatomic, assign) NSTimer *reRegistrationTimer;
+@property (nonatomic, strong) NSTimer *reRegistrationTimer;
 
 // Method to be called when account re-registration timer fires.
 - (void)reRegistrationTimerTick:(NSTimer *)theTimer;
@@ -92,30 +92,11 @@ NSString * const kEmailSIPLabel = @"sip";
 
 @implementation AccountController
 
-@synthesize enabled = enabled_;
-@synthesize account = account_;
-@dynamic accountRegistered;
-@synthesize callControllers = callControllers_;
-@synthesize accountDescription = accountDescription_;
-@synthesize attemptingToRegisterAccount = attemptingToRegisterAccount_;
-@synthesize attemptingToUnregisterAccount = attemptingToUnregisterAccount_;
-@synthesize shouldPresentRegistrationError = shouldPresentRegistrationError_;
-@synthesize accountUnavailable = accountUnavailable_;
-@synthesize reRegistrationTimer = reRegistrationTimer_;
-@synthesize shouldMakeCall = shouldMakeCall_;
-@synthesize catchedURLString = catchedURLString_;
-@synthesize registrarReachability = registrarReachability_;
-
-@synthesize substitutesPlusCharacter = substitutesPlusCharacter_;
-@synthesize plusCharacterSubstitution = plusCharacterSubstitution_;
-
-@dynamic activeAccountViewController;
-@dynamic authenticationFailureController;
-
-@synthesize accountStatePopUp = accountStatePopUp_;
+@synthesize activeAccountViewController = _activeAccountViewController;
+@synthesize authenticationFailureController = _authenticationFailureController;
 
 - (void)setEnabled:(BOOL)flag {
-    enabled_ = flag;
+    _enabled = flag;
     
     NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     
@@ -217,20 +198,20 @@ NSString * const kEmailSIPLabel = @"sip";
 }
 
 - (ActiveAccountViewController *)activeAccountViewController {
-    if (activeAccountViewController_ == nil) {
-        activeAccountViewController_ = [[ActiveAccountViewController alloc] initWithAccountController:self
+    if (_activeAccountViewController == nil) {
+        _activeAccountViewController = [[ActiveAccountViewController alloc] initWithAccountController:self
                                                                                      windowController:self];
     }
     
-    return activeAccountViewController_;
+    return _activeAccountViewController;
 }
 
 - (AuthenticationFailureController *)authenticationFailureController {
-    if (authenticationFailureController_ == nil) {
-        authenticationFailureController_ = [[AuthenticationFailureController alloc] initWithAccountController:self];
+    if (_authenticationFailureController == nil) {
+        _authenticationFailureController = [[AuthenticationFailureController alloc] initWithAccountController:self];
     }
     
-    return authenticationFailureController_;
+    return _authenticationFailureController;
 }
 
 - (id)initWithSIPAccount:(AKSIPAccount *)anAccount {
@@ -240,7 +221,7 @@ NSString * const kEmailSIPLabel = @"sip";
     }
     
     [self setAccount:anAccount];
-    callControllers_ = [[NSMutableArray alloc] init];
+    _callControllers = [[NSMutableArray alloc] init];
     [self setSubstitutesPlusCharacter:NO];
     
     [self setAttemptingToRegisterAccount:NO];
@@ -288,20 +269,7 @@ NSString * const kEmailSIPLabel = @"sip";
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     
     // Close authentication failure sheet if it's raised.
-    [[authenticationFailureController_ cancelButton] performClick:nil];
-    
-    [account_ release];
-    [callControllers_ release];
-    [accountDescription_ release];
-    [catchedURLString_ release];
-    [registrarReachability_ release];
-    [plusCharacterSubstitution_ release];
-    
-    [activeAccountViewController_ release];
-    
-    [accountStatePopUp_ release];
-    
-    [super dealloc];
+    [[_authenticationFailureController cancelButton] performClick:nil];
 }
 
 - (NSString *)description {
@@ -330,11 +298,11 @@ NSString * const kEmailSIPLabel = @"sip";
         callTransferController:(CallTransferController *)callTransferController {
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    AKTelephoneNumberFormatter *telephoneNumberFormatter = [[[AKTelephoneNumberFormatter alloc] init] autorelease];
+    AKTelephoneNumberFormatter *telephoneNumberFormatter = [[AKTelephoneNumberFormatter alloc] init];
     [telephoneNumberFormatter setSplitsLastFourDigits:
      [defaults boolForKey:kTelephoneNumberFormatterSplitsLastFourDigits]];
     
-    NSString *enteredCallDestinationString = [[[destinationURI user] copy] autorelease];
+    NSString *enteredCallDestinationString = [[destinationURI user] copy];
     
     // Make user part a string of contiguous digits if needed.
     if (![[destinationURI user] ak_hasLetters]) {
@@ -355,10 +323,9 @@ NSString * const kEmailSIPLabel = @"sip";
     // If it's a regular call, not a transfer, create the new CallController.
     CallController *aCallController;
     if (callTransferController == nil) {
-        aCallController = [[[CallController alloc] initWithWindowNibName:@"Call" accountController:self]
-                           autorelease];
+        aCallController = [[CallController alloc] initWithWindowNibName:@"Call" accountController:self];
     } else {
-        aCallController = [[callTransferController retain] autorelease];
+        aCallController = callTransferController;
     }
     
     [aCallController setNameFromAddressBook:[destinationURI displayName]];
@@ -478,7 +445,7 @@ NSString * const kEmailSIPLabel = @"sip";
 }
 
 - (void)showRegistrarConnectionErrorSheetWithError:(NSString *)error {
-    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+    NSAlert *alert = [[NSAlert alloc] init];
     [alert addButtonWithTitle:@"OK"];
     [alert setMessageText:[NSString stringWithFormat:
                            NSLocalizedString(@"Could not register with %@.", @"Registrar connection error."),
@@ -578,7 +545,7 @@ NSString * const kEmailSIPLabel = @"sip";
     
     [self removeViewController:[self activeAccountViewController]];
     NSRect frame = [[[self window] contentView] frame];
-    NSView *emptyView = [[[NSView alloc] initWithFrame:frame] autorelease];
+    NSView *emptyView = [[NSView alloc] initWithFrame:frame];
     NSUInteger autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
     [emptyView setAutoresizingMask:autoresizingMask];
     [[self window] setContentView:emptyView];
@@ -811,15 +778,14 @@ NSString * const kEmailSIPLabel = @"sip";
     
     [[NSApp delegate] pauseITunes];
     
-    CallController *aCallController = [[[CallController alloc] initWithWindowNibName:@"Call" accountController:self]
-                                       autorelease];
+    CallController *aCallController = [[CallController alloc] initWithWindowNibName:@"Call" accountController:self];
     
     [aCallController setCall:aCall];
     [aCallController setCallActive:YES];
     [aCallController setCallUnhandled:YES];
     [[self callControllers] addObject:aCallController];
     
-    AKSIPURIFormatter *SIPURIFormatter = [[[AKSIPURIFormatter alloc] init] autorelease];
+    AKSIPURIFormatter *SIPURIFormatter = [[AKSIPURIFormatter alloc] init];
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [SIPURIFormatter setFormatsTelephoneNumbers:[defaults boolForKey:kFormatTelephoneNumbers]];
     [SIPURIFormatter setTelephoneNumberFormatterSplitsLastFourDigits:
@@ -952,8 +918,7 @@ NSString * const kEmailSIPLabel = @"sip";
         if (!recordFound) {
             NSArray *allPeople = [AB people];
             
-            AKTelephoneNumberFormatter *telephoneNumberFormatter
-               = [[[AKTelephoneNumberFormatter alloc] init] autorelease];
+            AKTelephoneNumberFormatter *telephoneNumberFormatter = [[AKTelephoneNumberFormatter alloc] init];
             for (id theRecord in allPeople) {
                 ABMultiValue *phones = [theRecord valueForProperty:kABPhoneProperty];
                 
@@ -1017,7 +982,7 @@ NSString * const kEmailSIPLabel = @"sip";
     
     // Show Growl notification.
     NSString *callSource;
-    AKTelephoneNumberFormatter *telephoneNumberFormatter = [[[AKTelephoneNumberFormatter alloc] init] autorelease];
+    AKTelephoneNumberFormatter *telephoneNumberFormatter = [[AKTelephoneNumberFormatter alloc] init];
     [telephoneNumberFormatter setSplitsLastFourDigits:
      [defaults boolForKey:kTelephoneNumberFormatterSplitsLastFourDigits]];
     if ([[aCallController phoneLabelFromAddressBook] length] > 0) {

@@ -44,32 +44,13 @@ static const NSUInteger kAccountsMax = 32;
 
 @implementation AccountPreferencesViewController
 
-@synthesize preferencesController = preferencesController_;
-@dynamic accountSetupController;
-
-@synthesize accountsTable = accountsTable_;
-@synthesize addAccountButton = addAccountButton_;
-@synthesize accountEnabledCheckBox = accountEnabledCheckBox_;
-@synthesize accountDescriptionField = accountDescriptionField_;
-@synthesize fullNameField = fullNameField_;
-@synthesize domainField = domainField_;
-@synthesize usernameField = usernameField_;
-@synthesize passwordField = passwordField_;
-@synthesize reregistrationTimeField = reregistrationTimeField_;
-@synthesize substitutePlusCharacterCheckBox = substitutePlusCharacterCheckBox_;
-@synthesize plusCharacterSubstitutionField = plusCharacterSubstitutionField_;
-@synthesize useProxyCheckBox = useProxyCheckBox_;
-@synthesize proxyHostField = proxyHostField_;
-@synthesize proxyPortField = proxyPortField_;
-@synthesize SIPAddressField = SIPAddressField_;
-@synthesize registrarField = registrarField_;
-@synthesize cantEditAccountLabel = cantEditAccountLabel_;
+@synthesize accountSetupController = _accountSetupController;
 
 - (AccountSetupController *)accountSetupController {
-    if (accountSetupController_ == nil) {
-        accountSetupController_ = [[AccountSetupController alloc] init];
+    if (_accountSetupController == nil) {
+        _accountSetupController = [[AccountSetupController alloc] init];
     }
-    return accountSetupController_;
+    return _accountSetupController;
 }
 
 - (id)init {
@@ -105,27 +86,7 @@ static const NSUInteger kAccountsMax = 32;
 }
 
 - (void)dealloc {
-    [accountsTable_ release];
-    [addAccountButton_ release];
-    [accountEnabledCheckBox_ release];
-    [accountDescriptionField_ release];
-    [fullNameField_ release];
-    [domainField_ release];
-    [usernameField_ release];
-    [passwordField_ release];
-    [reregistrationTimeField_ release];
-    [substitutePlusCharacterCheckBox_ release];
-    [plusCharacterSubstitutionField_ release];
-    [useProxyCheckBox_ release];
-    [proxyHostField_ release];
-    [proxyPortField_ release];
-    [SIPAddressField_ release];
-    [registrarField_ release];
-    [cantEditAccountLabel_ release];
-    
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    
-    [super dealloc];
 }
 
 - (IBAction)showAddAccountSheet:(id)sender {
@@ -156,12 +117,12 @@ static const NSUInteger kAccountsMax = 32;
         return;
     }
     
-    NSTableColumn *theColumn = [[[NSTableColumn alloc] initWithIdentifier:@"SIPAddress"] autorelease];
+    NSTableColumn *theColumn = [[NSTableColumn alloc] initWithIdentifier:@"SIPAddress"];
     NSString *selectedAccount = [[[self accountsTable] dataSource] tableView:[self accountsTable]
                                                    objectValueForTableColumn:theColumn
                                                                          row:index];
     
-    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+    NSAlert *alert = [[NSAlert alloc] init];
     [alert addButtonWithTitle:NSLocalizedString(@"Delete", @"Delete button.")];
     [alert addButtonWithTitle:NSLocalizedString(@"Cancel", @"Cancel button.")];
     [[[alert buttons] objectAtIndex:1] setKeyEquivalent:@"\033"];
@@ -676,7 +637,7 @@ static const NSUInteger kAccountsMax = 32;
     NSInteger draggingRow = [indexes firstIndex];
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSMutableArray *accounts = [[[defaults arrayForKey:kAccounts] mutableCopy] autorelease];
+    NSMutableArray *accounts = [[defaults arrayForKey:kAccounts] mutableCopy];
     id selectedAccount = [accounts objectAtIndex:[[self accountsTable] selectedRow]];
     
     // Swap accounts.

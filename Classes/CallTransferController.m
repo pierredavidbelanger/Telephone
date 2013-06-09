@@ -41,10 +41,10 @@
 @interface CallTransferController ()
 
 // Source call controller.
-@property (nonatomic, assign) CallController *sourceCallController;
+@property (nonatomic, weak) CallController *sourceCallController;
 
 // Active account transfer view controller.
-@property (nonatomic, retain) ActiveAccountTransferViewController *activeAccountTransferViewController;
+@property (nonatomic, strong) ActiveAccountTransferViewController *activeAccountTransferViewController;
 
 // A Boolean value indicating whether the source call has been transferred.
 @property (nonatomic, assign) BOOL sourceCallTransferred;
@@ -54,21 +54,17 @@
 
 @implementation CallTransferController
 
-@synthesize sourceCallController = sourceCallController_;
-@synthesize activeAccountTransferViewController = activeAccountTransferViewController_;
-@synthesize sourceCallTransferred = sourceCallTransferred_;
-
 - (void)setSourceCallController:(CallController *)callController {
-    if (sourceCallController_ == callController) {
+    if (_sourceCallController == callController) {
         return;
     }
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     
-    if (sourceCallController_ != nil) {
+    if (_sourceCallController != nil) {
         [nc removeObserver:self
                       name:AKSIPCallTransferStatusDidChangeNotification
-                    object:[sourceCallController_ call]];
+                    object:[_sourceCallController call]];
     }
     
     if (callController != nil) {
@@ -80,7 +76,7 @@
     
     [self setSourceCallTransferred:NO];
     
-    sourceCallController_ = callController;
+    _sourceCallController = callController;
 }
 
 - (id)initWithSourceCallController:(CallController *)callController {
@@ -90,16 +86,11 @@
         
         AccountController *accountController = [[self sourceCallController] accountController];
         
-        activeAccountTransferViewController_
+        _activeAccountTransferViewController
             = [[ActiveAccountTransferViewController alloc] initWithAccountController:accountController
                                                                     windowController:self];
     }
     return self;
-}
-
-- (void)dealloc {
-    [activeAccountTransferViewController_ release];
-    [super dealloc];
 }
 
 - (void)windowDidLoad {
@@ -153,22 +144,22 @@
 
 // Substitutes ActiveCallTransferViewController.
 - (ActiveCallViewController *)activeCallViewController {
-    if (activeCallViewController_ == nil) {
-        activeCallViewController_
+    if (_activeCallViewController == nil) {
+        _activeCallViewController
             = [[ActiveCallTransferViewController alloc] initWithNibName:@"ActiveCallTransferView" callController:self];
-        [activeCallViewController_ setRepresentedObject:[self call]];
+        [_activeCallViewController setRepresentedObject:[self call]];
     }
-    return activeCallViewController_;
+    return _activeCallViewController;
 }
 
 // Substitutes EndedCallTransferViewController.
 - (EndedCallViewController *)endedCallViewController {
-    if (endedCallViewController_ == nil) {
-        endedCallViewController_
+    if (_endedCallViewController == nil) {
+        _endedCallViewController
             = [[EndedCallTransferViewController alloc] initWithNibName:@"EndedCallTransferView" callController:self];
-        [endedCallViewController_ setRepresentedObject:[self call]];
+        [_endedCallViewController setRepresentedObject:[self call]];
     }
-    return endedCallViewController_;
+    return _endedCallViewController;
 }
 
 - (void)acceptCall {

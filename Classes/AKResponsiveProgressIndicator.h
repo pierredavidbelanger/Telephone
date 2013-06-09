@@ -32,14 +32,10 @@
 
 
 // Allows progress indicator to send an action message to a target on mouse-up events.
-@interface AKResponsiveProgressIndicator : NSProgressIndicator {
-  @private
-    id target_;
-    SEL action_;
-}
+@interface AKResponsiveProgressIndicator : NSProgressIndicator
 
 // The receiver's target.
-@property (nonatomic, assign) id target;
+@property (nonatomic, weak) id target;
 
 // The receiver's action-message selector.
 @property (nonatomic, assign) SEL action;

@@ -74,48 +74,30 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
 
 @implementation CallController
 
-@synthesize identifier = identifier_;
-@synthesize call = call_;
-@synthesize accountController = accountController_;
-@synthesize callTransferController = callTransferController_;
-@synthesize displayedName = displayedName_;
-@synthesize status = status_;
-@synthesize nameFromAddressBook = nameFromAddressBook_;
-@synthesize phoneLabelFromAddressBook = phoneLabelFromAddressBook_;
-@synthesize enteredCallDestination = enteredCallDestination_;
-@synthesize redialURI = redialURI_;
-@synthesize intermediateStatusTimer = intermediateStatusTimer_;
-@synthesize callStartTime = callStartTime_;
-@synthesize callOnHold = callOnHold_;
-@synthesize callActive = callActive_;
-@synthesize callUnhandled = callUnhandled_;
-
-@dynamic incomingCallViewController;
-@dynamic activeCallViewController;
-@dynamic endedCallViewController;
+@synthesize callTransferController = _callTransferController;
+@synthesize incomingCallViewController = _incomingCallViewController;
 
 - (void)setCall:(AKSIPCall *)aCall {
-    if (call_ != aCall) {
-        if ([[call_ delegate] isEqual:self]) {
-            [call_ setDelegate:nil];
+    if (_call != aCall) {
+        if ([[_call delegate] isEqual:self]) {
+            [_call setDelegate:nil];
         }
         
-        [call_ release];
-        call_ = [aCall retain];
+        _call = aCall;
         
-        [call_ setDelegate:self];
+        [_call setDelegate:self];
     }
 }
 
 - (void)setAccountController:(AccountController *)anAccountController {
-    if (accountController_ == anAccountController) {
+    if (_accountController == anAccountController) {
         return;
     }
     
     NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
     
-    if (accountController_ != nil) {
-        [notificationCenter removeObserver:accountController_ name:nil object:self];
+    if (_accountController != nil) {
+        [notificationCenter removeObserver:_accountController name:nil object:self];
     }
     
     if (anAccountController != nil) {
@@ -127,40 +109,40 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
         }
     }
     
-    accountController_ = anAccountController;
+    _accountController = anAccountController;
 }
 
 - (CallTransferController *)callTransferController {
-    if (callTransferController_ == nil) {
-        callTransferController_ = [[CallTransferController alloc] initWithSourceCallController:self];
+    if (_callTransferController == nil) {
+        _callTransferController = [[CallTransferController alloc] initWithSourceCallController:self];
     }
-    return callTransferController_;
+    return _callTransferController;
 }
 
 - (IncomingCallViewController *)incomingCallViewController {
-    if (incomingCallViewController_ == nil) {
-        incomingCallViewController_ = [[IncomingCallViewController alloc] initWithCallController:self];
-        [incomingCallViewController_ setRepresentedObject:[self call]];
+    if (_incomingCallViewController == nil) {
+        _incomingCallViewController = [[IncomingCallViewController alloc] initWithCallController:self];
+        [_incomingCallViewController setRepresentedObject:[self call]];
     }
-    return incomingCallViewController_;
+    return _incomingCallViewController;
 }
 
 - (ActiveCallViewController *)activeCallViewController {
-    if (activeCallViewController_ == nil) {
-        activeCallViewController_ = [[ActiveCallViewController alloc] initWithNibName:@"ActiveCallView"
+    if (_activeCallViewController == nil) {
+        _activeCallViewController = [[ActiveCallViewController alloc] initWithNibName:@"ActiveCallView"
                                                                        callController:self];
-        [activeCallViewController_ setRepresentedObject:[self call]];
+        [_activeCallViewController setRepresentedObject:[self call]];
     }
-    return activeCallViewController_;
+    return _activeCallViewController;
 }
 
 - (EndedCallViewController *)endedCallViewController {
-    if (endedCallViewController_ == nil) {
-        endedCallViewController_ = [[EndedCallViewController alloc] initWithNibName:@"EndedCallView"
+    if (_endedCallViewController == nil) {
+        _endedCallViewController = [[EndedCallViewController alloc] initWithNibName:@"EndedCallView"
                                                                      callController:self];
-        [endedCallViewController_ setRepresentedObject:[self call]];
+        [_endedCallViewController setRepresentedObject:[self call]];
     }
-    return endedCallViewController_;
+    return _endedCallViewController;
 }
 
 - (id)initWithWindowNibName:(NSString *)windowNibName accountController:(AccountController *)anAccountController {
@@ -169,8 +151,8 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
         return nil;
     }
     
-    moc_ = [[[NSApp delegate] moc] retain];
-    callLog_ = nil;
+    [self setMoc:[[NSApp delegate] moc]];
+    [self setCallLog:nil];
     
     [self setIdentifier:[NSString ak_uuidString]];
     [self setAccountController:anAccountController];
@@ -186,25 +168,8 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
 }
 
 - (void)dealloc {
-    [identifier_ release];
-    
     [self setCall:nil];
     [self setAccountController:nil];
-    [callTransferController_ release];
-    [incomingCallViewController_ release];
-    [activeCallViewController_ release];
-    [endedCallViewController_ release];
-    [displayedName_ release];
-    [status_ release];
-    [nameFromAddressBook_ release];
-    [phoneLabelFromAddressBook_ release];
-    [enteredCallDestination_ release];
-    [redialURI_ release];
-    
-    [callLog_ release];
-    [moc_ release];
-    
-    [super dealloc];
 }
 
 - (NSString *)description {
@@ -228,7 +193,7 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
     [self setCallActive:NO];
     [self setCallUnhandled:NO];
     
-    if (activeCallViewController_ != nil) {
+    if (_activeCallViewController != nil) {
         [[self activeCallViewController] stopCallTimer];
     }
     
@@ -329,14 +294,14 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
     if (aCall != nil) {
         [self setCall:aCall];
         [self setCallActive:YES];
-        if (incomingCallViewController_ != nil) {
-            [incomingCallViewController_ setRepresentedObject:aCall];
+        if (_incomingCallViewController != nil) {
+            [_incomingCallViewController setRepresentedObject:aCall];
         }
-        if (activeCallViewController_ != nil) {
-            [activeCallViewController_ setRepresentedObject:aCall];
+        if (_activeCallViewController != nil) {
+            [_activeCallViewController setRepresentedObject:aCall];
         }
-        if (endedCallViewController_ != nil) {
-            [endedCallViewController_ setRepresentedObject:nil];
+        if (_endedCallViewController != nil) {
+            [_endedCallViewController setRepresentedObject:nil];
         }
     } else {
         if (![[self objectInViewControllersAtIndex:0] isEqual:[self endedCallViewController]]) {
@@ -416,6 +381,8 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
 }
 
 - (void)logCallBegin {
+    CallLog *callLog_ = [self callLog];
+    
     if (callLog_)
         return;
 
@@ -425,7 +392,7 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
     AKSIPCall *call = [self call];
 
     callLog_ = [NSEntityDescription insertNewObjectForEntityForName:[[CallLog class] description]
-                                             inManagedObjectContext:moc_];
+                                             inManagedObjectContext:[self moc]];
     [callLog_ setAccount:[[[self accountController] account] SIPAddress]];
     if ([[self nameFromAddressBook] length] > 0)
         [callLog_ setRemoteName:[self nameFromAddressBook]];
@@ -443,11 +410,15 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
     [callLog_ setMissed:NO];
 
     NSError *error;
-    if (![moc_ save:&error])
+    if (![[self moc] save:&error])
         NSLog(@"Error while saving CoreData context: %@", error);
+    
+    [self setCallLog:callLog_];
 }
 
 - (void)logCallUpdate {
+    CallLog *callLog_ = [self callLog];
+    
     if (!callLog_)
         return;
 
@@ -456,11 +427,13 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
     [callLog_ setSipStatusCode:[call lastStatus]];
 
     NSError *error;
-    if (![moc_ save:&error])
+    if (![[self moc] save:&error])
         NSLog(@"Error while saving CoreData context: %@", error);
 }
 
 - (void)logCallEnd {
+    CallLog *callLog_ = [self callLog];
+    
     if (!callLog_)
         return;
 
@@ -477,23 +450,18 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
     [callLog_ setMissed:[self isCallUnhandled]];
 
     NSError *error;
-    if (![moc_ save:&error])
+    if (![[self moc] save:&error])
         NSLog(@"Error while saving CoreData context: %@", error);
 
-    [callLog_ release];
-    callLog_ = nil;
+    [self setCallLog:nil];
 }
 
 #pragma mark -
 #pragma mark NSWindow delegate methods
 
 - (void)windowWillClose:(NSNotification *)notification {
-    if ([XSWindowController instancesRespondToSelector:@selector(windowWillClose:)]) {
-        // We have to call super's implementation of |windowWillClose:| via the function pointer because using
-        // [super windowWillClose:notification] will issue compiler warning.
-        id (*superWindowWillClose)(id, SEL, ...) = [XSWindowController instanceMethodForSelector:_cmd];
-        superWindowWillClose(self, _cmd);
-    }
+    [super windowWillClose:notification];
+    
     if ([self isCallActive]) {
         [self logCallEnd];
         
@@ -517,6 +485,13 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
     [[NSApp delegate] updateDockTileBadgeLabel];
     
     [[NSNotificationCenter defaultCenter] postNotificationName:AKCallWindowWillCloseNotification object:self];
+    
+    // View controllers must be nullified because of bindings to callController's |displayedName| and |status|. When
+    // this is done in -dealloc this is already too late, and KVO error about releaseing an object that is still being
+    // observied is issued.
+    _incomingCallViewController = nil;
+    _activeCallViewController = nil;
+    _endedCallViewController = nil;
 }
 
 
@@ -695,7 +670,7 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
         
     } else if ([[self enteredCallDestination] length] > 0) {
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-        AKTelephoneNumberFormatter *telephoneNumberFormatter = [[[AKTelephoneNumberFormatter alloc] init] autorelease];
+        AKTelephoneNumberFormatter *telephoneNumberFormatter = [[AKTelephoneNumberFormatter alloc] init];
         
         if ([[self enteredCallDestination] ak_isTelephoneNumber] && [defaults boolForKey:kFormatTelephoneNumbers]) {
             notificationTitle = [telephoneNumberFormatter stringForObjectValue:[self enteredCallDestination]];
@@ -703,7 +678,7 @@ static const NSTimeInterval kRedialButtonReenableTime = 1.0;
             notificationTitle = [self enteredCallDestination];
         }
     } else {
-        AKSIPURIFormatter *SIPURIFormatter = [[[AKSIPURIFormatter alloc] init] autorelease];
+        AKSIPURIFormatter *SIPURIFormatter = [[AKSIPURIFormatter alloc] init];
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         [SIPURIFormatter setFormatsTelephoneNumbers:[defaults boolForKey:kFormatTelephoneNumbers]];
         [SIPURIFormatter setTelephoneNumberFormatterSplitsLastFourDigits:

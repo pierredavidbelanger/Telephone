@@ -52,18 +52,15 @@ static void AKReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkConn
 
 @implementation AKNetworkReachability
 
-@synthesize host = host_;
-@dynamic reachable;
-
 - (BOOL)isReachable {
     SCNetworkConnectionFlags flags;
-    Boolean flagsValid = SCNetworkReachabilityGetFlags(reachability_, &flags);
+    Boolean flagsValid = SCNetworkReachabilityGetFlags(_reachability, &flags);
     
     return (flagsValid && (flags & kSCNetworkFlagsReachable)) ? YES : NO;
 }
 
 + (AKNetworkReachability *)networkReachabilityWithHost:(NSString *)nameOrAddress {
-    return [[[self alloc] initWithHost:nameOrAddress] autorelease];
+    return [[self alloc] initWithHost:nameOrAddress];
 }
 
 - (id)initWithHost:(NSString *)nameOrAddress {
@@ -73,7 +70,6 @@ static void AKReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkConn
     }
     
     if ([nameOrAddress length] == 0) {
-        [self release];
         return nil;
     }
     
@@ -83,23 +79,21 @@ static void AKReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkConn
         sin.sin_len = sizeof(sin);
         sin.sin_family = AF_INET;
         inet_aton([nameOrAddress UTF8String], &sin.sin_addr);
-        reachability_ = SCNetworkReachabilityCreateWithAddress(kCFAllocatorDefault, (struct sockaddr *)&sin);
+        _reachability = SCNetworkReachabilityCreateWithAddress(kCFAllocatorDefault, (struct sockaddr *)&sin);
     } else {
-        reachability_ = SCNetworkReachabilityCreateWithName(kCFAllocatorDefault, [nameOrAddress UTF8String]);
+        _reachability = SCNetworkReachabilityCreateWithName(kCFAllocatorDefault, [nameOrAddress UTF8String]);
     }
     
-    context_.info = self;
-    Boolean callbackSet = SCNetworkReachabilitySetCallback(reachability_, &AKReachabilityChanged, &context_);
+    _context.info = (__bridge void *)(self);
+    Boolean callbackSet = SCNetworkReachabilitySetCallback(_reachability, &AKReachabilityChanged, &_context);
     if (!callbackSet) {
-        [self release];
         return nil;
     }
     
-    Boolean scheduled = SCNetworkReachabilityScheduleWithRunLoop(reachability_,
+    Boolean scheduled = SCNetworkReachabilityScheduleWithRunLoop(_reachability,
                                                                  CFRunLoopGetMain(),
                                                                  kCFRunLoopDefaultMode);
     if (!scheduled) {
-        [self release];
         return nil;
     }
     
@@ -109,14 +103,10 @@ static void AKReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkConn
 }
 
 - (void)dealloc {
-    SCNetworkReachabilityUnscheduleFromRunLoop(reachability_, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
-    if (reachability_ != NULL) {
-        CFRelease(reachability_);
+    SCNetworkReachabilityUnscheduleFromRunLoop(_reachability, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
+    if (_reachability != NULL) {
+        CFRelease(_reachability);
     }
-    
-    [host_ release];
-    
-    [super dealloc];
 }
 
 - (NSString *)description {
@@ -127,7 +117,7 @@ static void AKReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkConn
 
 
 static void AKReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkConnectionFlags flags, void *info) {
-    AKNetworkReachability *networkReachability = (AKNetworkReachability *)info;
+    AKNetworkReachability *networkReachability = (__bridge AKNetworkReachability *)info;
     
     if (flags & kSCNetworkFlagsReachable) {
         [[NSNotificationCenter defaultCenter] postNotificationName:AKNetworkReachabilityDidBecomeReachableNotification

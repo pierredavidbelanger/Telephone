@@ -35,11 +35,8 @@
 @class CallLog;
 
 @interface CallLogController : XSWindowController
-{
-    NSArrayController *callLogArrayController_;
-}
 
-@property (nonatomic, retain) IBOutlet NSArrayController *callLogArrayController;
+@property (nonatomic, strong) IBOutlet NSArrayController *callLogArrayController;
 
 - (IBAction)makeCall:(CallLog *)callLog;
 

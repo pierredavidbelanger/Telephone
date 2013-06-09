@@ -98,39 +98,16 @@ extern NSString * const AKSIPUserAgentWillRemoveAccountNotification;
 // you change its properties when it is already running.
 @interface AKSIPUserAgent : NSObject {
   @private
-    id <AKSIPUserAgentDelegate> delegate_;
-    
-    NSMutableArray *accounts_;
-    AKSIPUserAgentState state_;
-    AKNATType detectedNATType_;
-    NSLock *pjsuaLock_;
-    
-    NSArray *nameservers_;
-    NSString *outboundProxyHost_;
-    NSUInteger outboundProxyPort_;
-    NSString *STUNServerHost_;
-    NSUInteger STUNServerPort_;
-    NSString *userAgentString_;
-    NSString *logFileName_;
-    NSUInteger logLevel_;
-    NSUInteger consoleLogLevel_;
-    BOOL detectsVoiceActivity_;
-    BOOL usesICE_;
-    NSUInteger transportPort_;
-    NSString *transportPublicHost_;
-    
-    AKSIPUserAgentCallData callData_[PJSUA_MAX_CALLS];
-    pj_pool_t *pjPool_;
-    NSInteger ringbackSlot_;
-    NSInteger ringbackCount_;
-    pjmedia_port *ringbackPort_;
+    AKSIPUserAgentCallData _callData[PJSUA_MAX_CALLS];
 }
 
 // The receiver's delegate.
+// |assign| instead of |weak| because possible candidates for delegate, i.e. NSWindowController and NSViewController,
+// don't support weak references in 10.7.
 @property (nonatomic, assign) id <AKSIPUserAgentDelegate> delegate;
 
 // Accounts added to the receiver.
-@property (readonly, retain) NSMutableArray *accounts;
+@property (readonly, strong) NSMutableArray *accounts;
 
 // A Boolean value indicating whether the receiver has been started.
 @property (nonatomic, readonly, assign, getter=isStarted) BOOL started;
@@ -142,7 +119,7 @@ extern NSString * const AKSIPUserAgentWillRemoveAccountNotification;
 @property (assign) AKNATType detectedNATType;
 
 // A lock that is used to start and stop the receiver.
-@property (retain) NSLock *pjsuaLock;
+@property (strong) NSLock *pjsuaLock;
 
 // The number of acitve calls controlled by the receiver.
 @property (nonatomic, readonly, assign) NSUInteger activeCallsCount;

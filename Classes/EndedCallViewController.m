@@ -35,12 +35,6 @@
 
 @implementation EndedCallViewController
 
-@synthesize callController = callController_;
-
-@synthesize displayedNameField = displayedNameField_;
-@synthesize statusField = statusField_;
-@synthesize redialButton = redialButton_;
-
 - (id)initWithNibName:(NSString *)nibName callController:(CallController *)callController {
     self = [super initWithNibName:nibName bundle:nil windowController:callController];
     
@@ -51,18 +45,9 @@
 }
 
 - (id)init {
-    [self dealloc];
     NSString *reason = @"Initialize EndedCallViewController with initWithCallController:";
     @throw [NSException exceptionWithName:@"AKBadInitCall" reason:reason userInfo:nil];
     return nil;
-}
-
-- (void)dealloc {
-    [displayedNameField_ release];
-    [statusField_ release];
-    [redialButton_ release];
-    
-    [super dealloc];
 }
 
 - (void)removeObservations {

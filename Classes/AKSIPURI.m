@@ -38,19 +38,6 @@
 
 @implementation AKSIPURI
 
-@dynamic SIPAddress;
-@synthesize displayName = displayName_;
-@synthesize user = user_;
-@synthesize password = password_;
-@synthesize host = host_;
-@synthesize port = port_;
-@synthesize userParameter = userParameter_;
-@synthesize methodParameter = methodParameter_;
-@synthesize transportParameter = transportParameter_;
-@synthesize TTLParameter = TTLParameter_;
-@synthesize looseRoutingParameter = looseRoutingParameter_;
-@synthesize maddrParameter = maddrParameter_;
-
 - (NSString *)SIPAddress {
     if ([[self user] length] > 0) {
         return [NSString stringWithFormat:@"%@@%@", [self user], [self host]];
@@ -63,11 +50,11 @@
 #pragma mark -
 
 + (id)SIPURIWithUser:(NSString *)aUser host:(NSString *)aHost displayName:(NSString *)aDisplayName {
-    return [[[self alloc] initWithUser:aUser host:aHost displayName:aDisplayName] autorelease];
+    return [[self alloc] initWithUser:aUser host:aHost displayName:aDisplayName];
 }
 
 + (id)SIPURIWithString:(NSString *)SIPURIString {
-    return [[[self alloc] initWithString:SIPURIString] autorelease];
+    return [[self alloc] initWithString:SIPURIString];
 }
 
 // Designated initializer.
@@ -98,8 +85,7 @@
     if ([predicate evaluateWithObject:SIPURIString]) {
         NSRange delimiterRange = [SIPURIString rangeOfString:@" <"];
         
-        NSMutableCharacterSet *trimmingCharacterSet = [[[NSCharacterSet whitespaceCharacterSet] mutableCopy]
-                                                       autorelease];
+        NSMutableCharacterSet *trimmingCharacterSet = [[NSCharacterSet whitespaceCharacterSet] mutableCopy];
         [trimmingCharacterSet addCharactersInString:@"\""];
         [self setDisplayName:[[SIPURIString substringToIndex:delimiterRange.location]
                               stringByTrimmingCharactersInSet:trimmingCharacterSet]];
@@ -121,7 +107,6 @@
     }
     
     if (![[AKSIPUserAgent sharedUserAgent] isStarted]) {
-        [self release];
         return nil;
     }
     
@@ -130,7 +115,6 @@
                                                   (char *)[SIPURIString cStringUsingEncoding:NSUTF8StringEncoding],
                                                   [SIPURIString length], PJSIP_PARSE_URI_AS_NAMEADDR);
     if (nameAddr == NULL) {
-        [self release];
         return nil;
     }
     
@@ -160,30 +144,16 @@
         [self setUser:[NSString stringWithPJString:uri->number]];
         
     } else {
-        [self release];
         return nil;
     }
     
     return self;
 }
 
-- (void)dealloc {
-    [displayName_ release];
-    [user_ release];
-    [password_ release];
-    [host_ release];
-    [userParameter_ release];
-    [methodParameter_ release];
-    [transportParameter_ release];
-    [maddrParameter_ release];
-    
-    [super dealloc];
-}
-
 - (NSString *)description {
     NSString *SIPAddressWithPort = [self SIPAddress];
     if ([self port] > 0) {
-        SIPAddressWithPort = [SIPAddressWithPort stringByAppendingFormat:@":%ld", (long)[self port]];
+        SIPAddressWithPort = [SIPAddressWithPort stringByAppendingFormat:@":%ld", [self port]];
     }
     
     if ([[self displayName] length] > 0) {

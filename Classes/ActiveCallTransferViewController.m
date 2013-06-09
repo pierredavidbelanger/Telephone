@@ -37,13 +37,6 @@
 
 @implementation ActiveCallTransferViewController
 
-@synthesize transferButton = transferButton_;
-
-- (void)dealloc {
-    [transferButton_ release];
-    [super dealloc];
-}
-
 - (void)awakeFromNib {
     [super awakeFromNib];
     

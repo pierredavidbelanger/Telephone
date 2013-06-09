@@ -57,27 +57,11 @@ extern NSString * const AKSIPAccountWillMakeCallNotification;
 
 // A class representing a SIP account. It contains a list of calls and maintains SIP registration. You can use this
 // class to make and receive calls.
-@interface AKSIPAccount : NSObject {
-  @private
-    NSObject <AKSIPAccountDelegate> *delegate_;
-    
-    AKSIPURI *registrationURI_;
-    
-    NSString *fullName_;
-    NSString *SIPAddress_;
-    NSString *registrar_;
-    NSString *realm_;
-    NSString *username_;
-    NSString *proxyHost_;
-    NSUInteger proxyPort_;
-    NSUInteger reregistrationTime_;
-    
-    NSInteger identifier_;
-    
-    NSMutableArray *calls_;
-}
+@interface AKSIPAccount : NSObject
 
 // The receiver's delegate.
+// |assign| instead of |weak| because possible candidates for delegate, i.e. NSWindowController and NSViewController,
+// don't support weak references in 10.7.
 @property (nonatomic, assign) NSObject <AKSIPAccountDelegate> *delegate;
 
 // The URI for SIP registration.
@@ -134,7 +118,7 @@ extern NSString * const AKSIPAccountWillMakeCallNotification;
 @property (nonatomic, readonly, copy) NSString *onlineStatusText;
 
 // Calls that belong to the receiver.
-@property (readonly, retain) NSMutableArray *calls;
+@property (readonly, strong) NSMutableArray *calls;
 
 // Creates and returns an AKSIPAccount object initialized with a given full name, SIP address, registrar, realm, and
 // user name.

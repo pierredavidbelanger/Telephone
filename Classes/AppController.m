@@ -53,6 +53,7 @@
 #import "CallController.h"
 #import "CallLogController.h"
 #import "PreferencesController.h"
+#import "SoundPreferencesViewController.h"
 
 
 NSString * const kAudioDeviceIdentifier = @"AudioDeviceIdentifier";
@@ -77,7 +78,9 @@ static const NSTimeInterval kUserAgentRestartDelayAfterDNSChange = 3.0;
 static NSString * const kDynamicStoreDNSSettings = @"State:/Network/Global/DNS";
 
 // AudioHardware callback to track adding/removing audio devices.
-static OSStatus AudioDevicesChanged(AudioHardwarePropertyID propertyID,
+static OSStatus AudioDevicesChanged(AudioObjectID objectID,
+                                    UInt32 numberAddresses,
+                                    const AudioObjectPropertyAddress addresses[],
                                     void *clientData);
 // Gets audio devices data.
 static OSStatus GetAudioDevices(Ptr *devices, UInt16 *devicesCount);
@@ -112,67 +115,39 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
 
 @implementation AppController
 
-@synthesize userAgent = userAgent_;
-@synthesize accountControllers = accountControllers_;
-@synthesize callLogController = callLogController_;
-@dynamic enabledAccountControllers;
-@dynamic preferencesController;
-@dynamic accountSetupController;
-@synthesize audioDevices = audioDevices_;
-@synthesize soundInputDeviceIndex = soundInputDeviceIndex_;
-@synthesize soundOutputDeviceIndex = soundOutputDeviceIndex_;
-@synthesize ringtoneOutputDeviceIndex = ringtoneOutputDeviceIndex_;
-@synthesize shouldSetUserAgentSoundIO = shouldSetUserAgentSoundIO_;
-@synthesize ringtone = ringtone_;
-@synthesize ringtoneTimer = ringtoneTimer_;
-@synthesize shouldRegisterAllAccounts = shouldRegisterAllAccounts_;
-@synthesize shouldRestartUserAgentASAP = shouldRestartUserAgentASAP_;
-@synthesize terminating = terminating_;
-@dynamic hasIncomingCallControllers;
-@dynamic hasActiveCallControllers;
-@dynamic currentNameservers;
-@synthesize didPauseITunes = didPauseITunes_;
-@synthesize shouldPresentUserAgentLaunchError = shouldPresentUserAgentLaunchError_;
-@dynamic unhandledIncomingCallsCount;
-@synthesize userAttentionTimer = userAttentionTimer_;
-
-@synthesize accountsMenuItems = accountsMenuItems_;
-@synthesize windowMenu = windowMenu_;
-@synthesize preferencesMenuItem = preferencesMenuItem_;
-
-@synthesize moc = moc_;
+@synthesize preferencesController = _preferencesController;
+@synthesize accountSetupController = _accountSetupController;
 
 - (NSArray *)enabledAccountControllers {
     return [[self accountControllers] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"enabled == YES"]];
 }
 
 - (PreferencesController *)preferencesController {
-    if (preferencesController_ == nil) {
-        preferencesController_ = [[PreferencesController alloc] init];
-        [preferencesController_ setDelegate:self];
+    if (_preferencesController == nil) {
+        _preferencesController = [[PreferencesController alloc] init];
+        [_preferencesController setDelegate:self];
     }
-    return preferencesController_;
+    return _preferencesController;
 }
 
 - (AccountSetupController *)accountSetupController {
-    if (accountSetupController_ == nil) {
-        accountSetupController_ = [[AccountSetupController alloc] init];
+    if (_accountSetupController == nil) {
+        _accountSetupController = [[AccountSetupController alloc] init];
     }
-    return accountSetupController_;
+    return _accountSetupController;
 }
 
 - (void)setRingtone:(NSSound *)aRingtone {
-    if (ringtone_ != aRingtone) {
-        [ringtone_ release];
-        ringtone_ = [aRingtone retain];
+    if (_ringtone != aRingtone) {
+        _ringtone = aRingtone;
         
         if ([[self audioDevices] count] > [self ringtoneOutputDeviceIndex]) {
             NSDictionary *ringtoneOutputDeviceDict
               = [[self audioDevices] objectAtIndex:[self ringtoneOutputDeviceIndex]];
-            [ringtone_ setPlaybackDeviceIdentifier:[ringtoneOutputDeviceDict objectForKey:kAudioDeviceUID]];
+            [_ringtone setPlaybackDeviceIdentifier:[ringtoneOutputDeviceDict objectForKey:kAudioDeviceUID]];
             
         } else {
-            [ringtone_ setPlaybackDeviceIdentifier:nil];
+            [_ringtone setPlaybackDeviceIdentifier:nil];
         }
     }
 }
@@ -209,20 +184,21 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
     NSBundle *mainBundle = [NSBundle mainBundle];
     NSString *bundleName = [[mainBundle infoDictionary] objectForKey:@"CFBundleName"];
     
-    SCDynamicStoreRef dynamicStore = SCDynamicStoreCreate(NULL, (CFStringRef)bundleName, NULL, NULL);
+    SCDynamicStoreRef dynamicStore = SCDynamicStoreCreate(NULL, (__bridge CFStringRef)bundleName, NULL, NULL);
     
-    CFPropertyListRef DNSSettings = SCDynamicStoreCopyValue(dynamicStore, (CFStringRef)kDynamicStoreDNSSettings);
+    CFPropertyListRef DNSSettings = SCDynamicStoreCopyValue(dynamicStore,
+                                                            (__bridge CFStringRef)kDynamicStoreDNSSettings);
     
     NSArray *nameservers = nil;
     if (DNSSettings != NULL) {
-        nameservers = [[(NSDictionary *)DNSSettings objectForKey:@"ServerAddresses"] retain];
+        nameservers = [(__bridge NSDictionary *)DNSSettings objectForKey:@"ServerAddresses"];
         
         CFRelease(DNSSettings);
     }
     
     CFRelease(dynamicStore);
     
-    return [nameservers autorelease];
+    return nameservers;
 }
 
 - (NSUInteger)unhandledIncomingCallsCount {
@@ -305,9 +281,9 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
         return nil;
     }
     
-    userAgent_ = [AKSIPUserAgent sharedUserAgent];
+    _userAgent = [AKSIPUserAgent sharedUserAgent];
     [[self userAgent] setDelegate:self];
-    accountControllers_ = [[NSMutableArray alloc] init];
+    _accountControllers = [[NSMutableArray alloc] init];
     [self setSoundInputDeviceIndex:kAKSIPUserAgentInvalidIdentifier];
     [self setSoundOutputDeviceIndex:kAKSIPUserAgentInvalidIdentifier];
     [self setShouldSetUserAgentSoundIO:NO];
@@ -400,30 +376,13 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
 }
 
 - (void)dealloc {
-    [userAgent_ dealloc];
-    [accountControllers_ release];
-    
-    if ([[preferencesController_ delegate] isEqual:self]) {
-        [preferencesController_ setDelegate:nil];
+    if ([[_preferencesController delegate] isEqual:self]) {
+        [_preferencesController setDelegate:nil];
     }
-    [preferencesController_ release];
-    
-    [callLogController_ release];
-    
-    [audioDevices_ release];
-    [ringtone_ release];
-    
-    [accountsMenuItems_ release];
-    [windowMenu_ release];
-    [preferencesMenuItem_ release];
     
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [[[NSWorkspace sharedWorkspace] notificationCenter] removeObserver:self];
     [[NSDistributedNotificationCenter defaultCenter] removeObserver:self];
-    
-    [moc_ release];
-    
-    [super dealloc];
 }
 
 - (void)stopUserAgent {
@@ -456,7 +415,7 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
     NSMutableArray *devicesArray = [NSMutableArray array];
     
     // Fetch a pointer to the list of available devices.
-    AudioDeviceID *devices = NULL;
+    AudioObjectID *devices = NULL;
     UInt16 devicesCount = 0;
     err = GetAudioDevices((Ptr *)&devices, &devicesCount);
     if (err != noErr) {
@@ -469,55 +428,32 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
         
         // Get device identifier.
         NSUInteger deviceIdentifier = devices[loopCount];
-        [deviceDict setObject:[NSNumber numberWithUnsignedInteger:deviceIdentifier] forKey:kAudioDeviceIdentifier];
+        deviceDict[kAudioDeviceIdentifier] = @(deviceIdentifier);
         
-        // Get device UID.
-        CFStringRef UIDStringRef = NULL;
-        size = sizeof(CFStringRef);
-        err = AudioDeviceGetProperty(devices[loopCount],
-                                     0,
-                                     0,
-                                     kAudioDevicePropertyDeviceUID,
-                                     &size,
-                                     &UIDStringRef);
-        if ((err == noErr) && (UIDStringRef != NULL)) {
-            [deviceDict setObject:(NSString *)UIDStringRef forKey:kAudioDeviceUID];
-            CFRelease(UIDStringRef);
-        }
-        
+        AudioObjectPropertyAddress address = { kAudioObjectPropertyName,
+                                               kAudioObjectPropertyScopeGlobal,
+                                               kAudioObjectPropertyElementMaster };
         // Get device name.
         CFStringRef nameStringRef = NULL;
         size = sizeof(CFStringRef);
-        err = AudioDeviceGetProperty(devices[loopCount],
-                                     0,
-                                     0,
-                                     kAudioDevicePropertyDeviceNameCFString,
-                                     &size,
-                                     &nameStringRef);
+        err = AudioObjectGetPropertyData(devices[loopCount], &address, 0, NULL, &size, &nameStringRef);
         if ((err == noErr) && (nameStringRef != NULL)) {
-            [deviceDict setObject:(NSString *)nameStringRef forKey:kAudioDeviceName];
+            deviceDict[kAudioDeviceName] = (__bridge  NSString *)nameStringRef;
             CFRelease(nameStringRef);
         }
         
         // Get number of input channels.
         size = 0;
         NSUInteger inputChannelsCount = 0;
-        err = AudioDeviceGetPropertyInfo(devices[loopCount],
-                                         0,
-                                         1,
-                                         kAudioDevicePropertyStreamConfiguration,
-                                         &size,
-                                         NULL);
+        address.mSelector = kAudioDevicePropertyStreamConfiguration;
+        address.mScope = kAudioObjectPropertyScopeInput;
+        address.mElement = 0;
+        err = AudioObjectGetPropertyDataSize(devices[loopCount], &address, 0, NULL, &size);
         if ((err == noErr) && (size != 0)) {
             theBufferList = (AudioBufferList *)malloc(size);
             if (theBufferList != NULL) {
                 // Get the input stream configuration.
-                err = AudioDeviceGetProperty(devices[loopCount],
-                                             0,
-                                             1,
-                                             kAudioDevicePropertyStreamConfiguration,
-                                             &size,
-                                             theBufferList);
+                err = AudioObjectGetPropertyData(devices[loopCount], &address, 0, NULL, &size, theBufferList);
                 if (err == noErr) {
                     // Count the total number of input channels in the stream.
                     for (i = 0; i < theBufferList->mNumberBuffers; ++i) {
@@ -526,32 +462,20 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
                 }
                 free(theBufferList);
                 
-                NSNumber *inputChannelsCountNumber
-                = [NSNumber numberWithUnsignedInteger:inputChannelsCount];
-                [deviceDict setObject:inputChannelsCountNumber
-                               forKey:kAudioDeviceInputsCount];
+                deviceDict[kAudioDeviceInputsCount] = @(inputChannelsCount);
             }
         }
         
         // Get number of output channels.
         size = 0;
         NSUInteger outputChannelsCount = 0;
-        err = AudioDeviceGetPropertyInfo(devices[loopCount],
-                                         0,
-                                         0,
-                                         kAudioDevicePropertyStreamConfiguration,
-                                         &size,
-                                         NULL);
+        address.mScope = kAudioObjectPropertyScopeOutput;
+        err = AudioObjectGetPropertyDataSize(devices[loopCount], &address, 0, NULL, &size);
         if((err == noErr) && (size != 0)) {
             theBufferList = (AudioBufferList *)malloc(size);
             if (theBufferList != NULL) {
                 // Get the input stream configuration.
-                err = AudioDeviceGetProperty(devices[loopCount],
-                                             0,
-                                             0,
-                                             kAudioDevicePropertyStreamConfiguration,
-                                             &size,
-                                             theBufferList);
+                err = AudioObjectGetPropertyData(devices[loopCount], &address, 0, NULL, &size, theBufferList);
                 if(err == noErr) {
                     // Count the total number of output channels in the stream.
                     for (i = 0; i < theBufferList->mNumberBuffers; ++i) {
@@ -560,8 +484,7 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
                 }
                 free(theBufferList);
                 
-                NSNumber *outputChannelsCountNumber = [NSNumber numberWithUnsignedInteger:outputChannelsCount];
-                [deviceDict setObject:outputChannelsCountNumber forKey:kAudioDeviceOutputsCount];
+                deviceDict[kAudioDeviceOutputsCount] = @(outputChannelsCount);
             }
         }
         
@@ -570,7 +493,7 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
     
     free(devices);
     
-    [self setAudioDevices:[[devicesArray copy] autorelease]];
+    [self setAudioDevices:[devicesArray copy]];
     
     // Update audio devices in the user agent.
     [[self userAgent] performSelectorOnMainThread:@selector(updateAudioDevices) withObject:nil waitUntilDone:YES];
@@ -696,9 +619,9 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
 
 - (IBAction)showCallLogWindow:(id)sender
 {
-    if (!callLogController_)
-        callLogController_ = [[CallLogController alloc] initWithWindowNibName:@"CallLog"];
-    [callLogController_ showWindow:nil];
+    if (![self callLogController])
+        [self setCallLogController:[[CallLogController alloc] initWithWindowNibName:@"CallLog"]];
+    [[self callLogController] showWindow:nil];
 }
 
 - (IBAction)addAccountOnFirstLaunch:(id)sender {
@@ -718,7 +641,7 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
         [[[self accountSetupController] otherButton] setAction:@selector(closeSheet:)];
         
         // Install audio devices changes callback.
-        AudioHardwareAddPropertyListener(kAudioHardwarePropertyDevices, &AudioDevicesChanged, self);
+        [self subscribeToAudioDeviceChanges];
         
         // Get available audio devices, select devices for sound input and output.
         [self updateAudioDevices];
@@ -840,7 +763,7 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
     NSMutableArray *itemsArray = [NSMutableArray arrayWithCapacity:[enabledControllers count]];
     NSUInteger accountNumber = 1;
     for (AccountController *accountController in enabledControllers) {
-        NSMenuItem *menuItem = [[[NSMenuItem alloc] init] autorelease];
+        NSMenuItem *menuItem = [[NSMenuItem alloc] init];
         [menuItem setRepresentedObject:accountController];
         [menuItem setAction:@selector(toggleAccountWindow:)];
         if ([[accountController accountDescription] length] > 0) {
@@ -850,7 +773,7 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
         }
         if (accountNumber < 10) {
             // Only add key equivalents for Command-[1..9].
-            [menuItem setKeyEquivalent:[NSString stringWithFormat:@"%lu", (long)accountNumber]];
+            [menuItem setKeyEquivalent:[NSString stringWithFormat:@"%lu", accountNumber]];
         }
         [itemsArray addObject:menuItem];
         accountNumber++;
@@ -885,7 +808,7 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
     if (badgeNumber == 0) {
         badgeString = @"";
     } else {
-        badgeString = [NSString stringWithFormat:@"%d", badgeNumber];
+        badgeString = [NSString stringWithFormat:@"%lu", badgeNumber];
     }
     
     [[NSApp dockTile] setBadgeLabel:badgeString];
@@ -906,7 +829,7 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
             NSString *addressBookPlugInsInstallPath
               = [libraryPath stringByAppendingPathComponent:@"Address Book Plug-Ins"];
             
-            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            NSAlert *alert = [[NSAlert alloc] init];
             [alert addButtonWithTitle:@"OK"];
             [alert setMessageText:NSLocalizedString(@"Could not install Address Book plug-ins.",
                                                     @"Address Book plug-ins install error, alert "
@@ -957,11 +880,9 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
                            [NSNumber numberWithBool:YES], NSInferMappingModelAutomaticallyOption,
                            nil];
 
-    NSManagedObjectModel *mom = [[[NSManagedObjectModel alloc]
-                                initWithContentsOfURL:modelURL] autorelease];
+    NSManagedObjectModel *mom = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
 
-    NSPersistentStoreCoordinator *psc = [[[NSPersistentStoreCoordinator alloc]
-                                        initWithManagedObjectModel:mom] autorelease];
+    NSPersistentStoreCoordinator *psc = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
 
     if (![psc addPersistentStoreWithType:NSSQLiteStoreType
                          configuration:nil
@@ -970,27 +891,28 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
                                  error:&error])
         [[NSApplication sharedApplication] presentError:error];
 
-    moc_ = [[NSManagedObjectContext alloc] init];
-    [moc_ setPersistentStoreCoordinator:psc];
+    NSManagedObjectContext *moc = [[NSManagedObjectContext alloc] init];
+    [moc setPersistentStoreCoordinator:psc];
+    [self setMoc:moc];
 }
 
 - (void)cleanupCoreDataStack {
-    if (![moc_ hasChanges])
+    if (![[self moc] hasChanges])
         return;
     NSError *error = nil;
-    if (![moc_ save:&error])
+    if (![[self moc] save:&error])
         NSLog(@"Unable to properly cleanup CoreData: error while saving context: %@", error);
 }
 
 - (void)installDNSChangesCallback {
     NSString *bundleName = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"];
     SCDynamicStoreRef dynamicStore = SCDynamicStoreCreate(kCFAllocatorDefault,
-                                                          (CFStringRef)bundleName,
+                                                          (__bridge CFStringRef)bundleName,
                                                           &NameserversChanged,
                                                           NULL);
     
     NSArray *keys = [NSArray arrayWithObject:kDynamicStoreDNSSettings];
-    SCDynamicStoreSetNotificationKeys(dynamicStore, (CFArrayRef)keys, NULL);
+    SCDynamicStoreSetNotificationKeys(dynamicStore, (__bridge CFArrayRef)keys, NULL);
     
     CFRunLoopSourceRef runLoopSource = SCDynamicStoreCreateRunLoopSource(kCFAllocatorDefault, dynamicStore, 0);
     
@@ -1015,6 +937,14 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
                   directoryPath, [error localizedDescription]);
         }
     }
+}
+
+- (void)subscribeToAudioDeviceChanges {
+    AudioObjectPropertyAddress address = { kAudioHardwarePropertyDevices,
+                                           kAudioObjectPropertyScopeGlobal,
+                                           kAudioObjectPropertyElementMaster };
+    
+    AudioObjectAddPropertyListener(kAudioObjectSystemObject, &address, &AudioDevicesChanged, (__bridge void *)self);
 }
 
 - (BOOL)installAddressBookPlugInsAndReturnError:(NSError **)error {
@@ -1353,12 +1283,11 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
                             [accountDict objectForKey:kDomain]];
     
     AccountController *theAccountController
-        = [[[AccountController alloc] initWithFullName:[accountDict objectForKey:kFullName]
+        = [[AccountController alloc] initWithFullName:[accountDict objectForKey:kFullName]
                                             SIPAddress:SIPAddress
                                              registrar:[accountDict objectForKey:kDomain]
                                                  realm:[accountDict objectForKey:kRealm]
-                                              username:[accountDict objectForKey:kUsername]]
-           autorelease];
+                                              username:[accountDict objectForKey:kUsername]];
     
     [[theAccountController window] setExcludedFromWindowsMenu:YES];
     
@@ -1419,12 +1348,11 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
         }
         
         AccountController *theAccountController
-            = [[[AccountController alloc] initWithFullName:[accountDict objectForKey:kFullName]
+            = [[AccountController alloc] initWithFullName:[accountDict objectForKey:kFullName]
                                                 SIPAddress:SIPAddress
                                                  registrar:registrar
                                                      realm:[accountDict objectForKey:kRealm]
-                                                  username:[accountDict objectForKey:kUsername]]
-               autorelease];
+                                                  username:[accountDict objectForKey:kUsername]];
         
         [[theAccountController window] setExcludedFromWindowsMenu:YES];
         
@@ -1586,7 +1514,7 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
         
         if ([self shouldPresentUserAgentLaunchError] && [NSApp modalWindow] == nil) {
             // Display application modal alert.
-            NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+            NSAlert *alert = [[NSAlert alloc] init];
             [alert addButtonWithTitle:@"OK"];
             [alert setMessageText:NSLocalizedString(@"Could not start SIP user agent.",
                                                     @"SIP user agent start error.")];
@@ -1614,7 +1542,7 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
 }
 
 - (void)SIPUserAgentDidDetectNAT:(NSNotification *)notification {
-    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+    NSAlert *alert = [[NSAlert alloc] init];
     [alert addButtonWithTitle:@"OK"];
     
     switch ([[self userAgent] detectedNATType]) {
@@ -1766,12 +1694,11 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
         NSString *username = [accountDict objectForKey:kUsername];
         
         AccountController *anAccountController
-            = [[[AccountController alloc] initWithFullName:fullName
+            = [[AccountController alloc] initWithFullName:fullName
                                                 SIPAddress:SIPAddress
                                                  registrar:registrar
                                                      realm:realm
-                                                  username:username]
-               autorelease];
+                                                  username:username];
         
         [[anAccountController window] setExcludedFromWindowsMenu:YES];
         
@@ -1817,7 +1744,7 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
     [self updateAccountsMenuItems];
     
     // Install audio devices changes callback.
-    AudioHardwareAddPropertyListener(kAudioHardwarePropertyDevices, &AudioDevicesChanged, self);
+    [self subscribeToAudioDeviceChanges];
     
     // Get available audio devices, select devices for sound input and output.
     [self updateAudioDevices];
@@ -1885,7 +1812,7 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender {
     if ([self hasActiveCallControllers]) {
-        NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+        NSAlert *alert = [[NSAlert alloc] init];
         [alert addButtonWithTitle:NSLocalizedString(@"Quit", @"Quit button.")];
         [alert addButtonWithTitle:NSLocalizedString(@"Cancel", @"Cancel button.")];
         [[[alert buttons] objectAtIndex:1] setKeyEquivalent:@"\033"];
@@ -2144,55 +2071,51 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
 
 #pragma mark -
 
-// Sends updateAudioDevices to AppController.
-static OSStatus AudioDevicesChanged(AudioHardwarePropertyID propertyID,
+static OSStatus AudioDevicesChanged(AudioObjectID objectID,
+                                    UInt32 numberAddresses,
+                                    const AudioObjectPropertyAddress addresses[],
                                     void *clientData) {
     
-    AppController *appController = (AppController *)clientData;
-    
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    
-    if (propertyID == kAudioHardwarePropertyDevices) {
-        [NSObject cancelPreviousPerformRequestsWithTarget:appController
-                                                 selector:@selector(updateAudioDevices)
-                                                   object:nil];
-        [appController performSelector:@selector(updateAudioDevices) withObject:nil afterDelay:0.2];
-    } else {
-        NSLog(@"Not handling this property id");
+    AppController *appController = (__bridge AppController *)clientData;
+    for (UInt32 i = 0; i < numberAddresses; i++) {
+        if (addresses[i].mSelector == kAudioHardwarePropertyDevices) {
+            [NSObject cancelPreviousPerformRequestsWithTarget:appController
+                                                     selector:@selector(updateAudioDevices)
+                                                       object:nil];
+            [appController performSelector:@selector(updateAudioDevices) withObject:nil afterDelay:0.2];
+        }
     }
-    
-    [pool release];
     
     return noErr;
 }
 
-static OSStatus GetAudioDevices(Ptr *devices, UInt16 *devicesCount) {
-    OSStatus err = noErr;
-    UInt32 size;
-    Boolean isWritable;
+static OSStatus GetAudioDevices(Ptr *devices, UInt16 *deviceCount) {
+    OSStatus *error = noErr;
+    UInt32 dataSize;
     
-    // Get sound devices count.
-    err = AudioHardwareGetPropertyInfo(kAudioHardwarePropertyDevices, &size, &isWritable);
-    if (err != noErr) {
-        return err;
+    AudioObjectPropertyAddress address = { kAudioHardwarePropertyDevices,
+                                           kAudioObjectPropertyScopeGlobal,
+                                           kAudioObjectPropertyElementMaster };
+    error = AudioObjectGetPropertyDataSize(kAudioObjectSystemObject, &address, 0, NULL, &dataSize);
+    if (error != noErr) {
+        return error;
     }
     
-    *devicesCount = size / sizeof(AudioDeviceID);
-    if (*devicesCount < 1) {
-        return err;
+    *deviceCount = dataSize / (UInt16)sizeof(AudioObjectID);
+    if (*deviceCount < 1) {
+        NSLog(@"No audio devices found");
+        return error;
     }
     
-    // Allocate space for devices.
-    *devices = (Ptr)malloc(size);
-    memset(*devices, 0, size);
-    
-    // Get the data.
-    err = AudioHardwareGetProperty(kAudioHardwarePropertyDevices, &size, (void *)*devices);
-    if (err != noErr) {
-        return err;
+    if (*devices != NULL) {
+        free(devices);
     }
+    *devices = (Ptr)malloc(dataSize);
+    memset(*devices, 0, dataSize);
     
-    return err;
+    error = AudioObjectGetPropertyData(kAudioObjectSystemObject, &address, 0, NULL, &dataSize, (void *)*devices);
+    
+    return error;
 }
 
 static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, void *info) {

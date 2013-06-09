@@ -33,8 +33,6 @@
 
 @implementation AKTelephoneNumberFormatter
 
-@synthesize splitsLastFourDigits = splitsLastFourDigits_;
-
 - (NSString *)stringForObjectValue:(id)anObject {
     if (![anObject isKindOfClass:[NSString class]]) {
         return nil;
@@ -256,14 +254,11 @@
     if ([telephoneNumber length] > 0) {
         returnValue = YES;
         if (anObject != NULL) {
-            *anObject = [[telephoneNumber copy] autorelease];
+            *anObject = [telephoneNumber copy];
         }
     } else if (error != NULL) {
         *error = [NSString stringWithFormat:@"Couldn't convert \"%@\" to telephone number", string];
     }
-    
-    [telephoneNumber release];
-    [phoneNumberCharacterSet release];
     
     return returnValue;
 }

@@ -96,27 +96,11 @@ extern NSString * const AKSIPCallTransferStatusDidChangeNotification;
 @class AKSIPAccount, AKSIPURI;
 
 // A class representing a SIP call.
-@interface AKSIPCall : NSObject {
-  @private
-    id delegate_;
-    
-    NSInteger identifier_;
-    AKSIPURI *localURI_;
-    AKSIPURI *remoteURI_;
-    AKSIPCallState state_;
-    NSString *stateText_;
-    NSInteger lastStatus_;
-    NSString *lastStatusText_;
-    NSInteger transferStatus_;
-    NSString *transferStatusText_;
-    BOOL incoming_;
-    BOOL microphoneMuted_;
-    
-    // Account the call belongs to.
-    AKSIPAccount *account_;
-}
+@interface AKSIPCall : NSObject
 
 // The receiver's delegate.
+// |assign| instead of |weak| because possible candidates for delegate, i.e. NSWindowController and NSViewController,
+// don't support weak references in 10.7.
 @property (nonatomic, assign) id delegate;
 
 // The receiver's identifier.
@@ -169,7 +153,7 @@ extern NSString * const AKSIPCallTransferStatusDidChangeNotification;
 @property (nonatomic, readonly, assign, getter=isOnRemoteHold) BOOL onRemoteHold;
 
 // The account the call belongs to.
-@property (nonatomic, assign) AKSIPAccount *account;
+@property (nonatomic, weak) AKSIPAccount *account;
 
 // Designated initializer.
 // Initializes a AKSIPCall object with a given SIP account and identifier.

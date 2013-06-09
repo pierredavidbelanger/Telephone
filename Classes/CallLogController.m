@@ -39,20 +39,16 @@
 
 @implementation CallLogController
 
-@synthesize callLogArrayController = callLogArrayController_;
-
 - (void)dealloc
 {
-    [callLogArrayController_ release];
-    [super dealloc];
 }
 
 - (void)windowDidLoad
 {
-    if ([[callLogArrayController_ sortDescriptors] count] == 0) {
+    if ([[[self callLogArrayController] sortDescriptors] count] == 0) {
         NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"datetime" ascending:NO];
         NSArray *sortDescriptors = [NSArray arrayWithObject:sortDescriptor];
-        [callLogArrayController_ setSortDescriptors:sortDescriptors];
+        [[self callLogArrayController] setSortDescriptors:sortDescriptors];
     }
 }
 
@@ -83,7 +79,7 @@
         }
     }
     if (theAccountController) {
-        AKSIPURI *uri = [[[AKSIPURI alloc] initWithString:[callLog remoteURI]] autorelease];
+        AKSIPURI *uri = [[AKSIPURI alloc] initWithString:[callLog remoteURI]];
         if ([[uri displayName] length] == 0) {
             if ([[callLog remoteName] length] > 0)
                 [uri setDisplayName:[callLog remoteName]];

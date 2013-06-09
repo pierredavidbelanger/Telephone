@@ -1233,6 +1233,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1265,23 +1266,23 @@
 					"-DNDEBUG",
 				);
 				OTHER_LDFLAGS = (
-					"-lpjsua-i386-apple-darwin11.3.0",
-					"-lpjsip-ua-i386-apple-darwin11.3.0",
-					"-lpjsip-simple-i386-apple-darwin11.3.0",
-					"-lpjsip-i386-apple-darwin11.3.0",
-					"-lpjmedia-codec-i386-apple-darwin11.3.0",
-					"-lpjmedia-i386-apple-darwin11.3.0",
-					"-lpjmedia-audiodev-i386-apple-darwin11.3.0",
-					"-lpjnath-i386-apple-darwin11.3.0",
-					"-lpjlib-util-i386-apple-darwin11.3.0",
-					"-lresample-i386-apple-darwin11.3.0",
-					"-lmilenage-i386-apple-darwin11.3.0",
-					"-lsrtp-i386-apple-darwin11.3.0",
-					"-lgsmcodec-i386-apple-darwin11.3.0",
-					"-lspeex-i386-apple-darwin11.3.0",
-					"-lilbccodec-i386-apple-darwin11.3.0",
-					"-lportaudio-i386-apple-darwin11.3.0",
-					"-lpj-i386-apple-darwin11.3.0",
+					"-lpjsua-i386-apple-darwin12.2.0",
+					"-lpjsip-ua-i386-apple-darwin12.2.0",
+					"-lpjsip-simple-i386-apple-darwin12.2.0",
+					"-lpjsip-i386-apple-darwin12.2.0",
+					"-lpjmedia-codec-i386-apple-darwin12.2.0",
+					"-lpjmedia-i386-apple-darwin12.2.0",
+					"-lpjmedia-audiodev-i386-apple-darwin12.2.0",
+					"-lpjnath-i386-apple-darwin12.2.0",
+					"-lpjlib-util-i386-apple-darwin12.2.0",
+					"-lresample-i386-apple-darwin12.2.0",
+					"-lmilenage-i386-apple-darwin12.2.0",
+					"-lsrtp-i386-apple-darwin12.2.0",
+					"-lgsmcodec-i386-apple-darwin12.2.0",
+					"-lspeex-i386-apple-darwin12.2.0",
+					"-lilbccodec-i386-apple-darwin12.2.0",
+					"-lportaudio-i386-apple-darwin12.2.0",
+					"-lpj-i386-apple-darwin12.2.0",
 				);
 				PRODUCT_NAME = Telephone;
 			};
@@ -1291,6 +1292,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1321,23 +1323,23 @@
 					"-DNDEBUG",
 				);
 				OTHER_LDFLAGS = (
-					"-lpjsua-i386-apple-darwin11.3.0",
-					"-lpjsip-ua-i386-apple-darwin11.3.0",
-					"-lpjsip-simple-i386-apple-darwin11.3.0",
-					"-lpjsip-i386-apple-darwin11.3.0",
-					"-lpjmedia-codec-i386-apple-darwin11.3.0",
-					"-lpjmedia-i386-apple-darwin11.3.0",
-					"-lpjmedia-audiodev-i386-apple-darwin11.3.0",
-					"-lpjnath-i386-apple-darwin11.3.0",
-					"-lpjlib-util-i386-apple-darwin11.3.0",
-					"-lresample-i386-apple-darwin11.3.0",
-					"-lmilenage-i386-apple-darwin11.3.0",
-					"-lsrtp-i386-apple-darwin11.3.0",
-					"-lgsmcodec-i386-apple-darwin11.3.0",
-					"-lspeex-i386-apple-darwin11.3.0",
-					"-lilbccodec-i386-apple-darwin11.3.0",
-					"-lportaudio-i386-apple-darwin11.3.0",
-					"-lpj-i386-apple-darwin11.3.0",
+					"-lpjsua-i386-apple-darwin12.2.0",
+					"-lpjsip-ua-i386-apple-darwin12.2.0",
+					"-lpjsip-simple-i386-apple-darwin12.2.0",
+					"-lpjsip-i386-apple-darwin12.2.0",
+					"-lpjmedia-codec-i386-apple-darwin12.2.0",
+					"-lpjmedia-i386-apple-darwin12.2.0",
+					"-lpjmedia-audiodev-i386-apple-darwin12.2.0",
+					"-lpjnath-i386-apple-darwin12.2.0",
+					"-lpjlib-util-i386-apple-darwin12.2.0",
+					"-lresample-i386-apple-darwin12.2.0",
+					"-lmilenage-i386-apple-darwin12.2.0",
+					"-lsrtp-i386-apple-darwin12.2.0",
+					"-lgsmcodec-i386-apple-darwin12.2.0",
+					"-lspeex-i386-apple-darwin12.2.0",
+					"-lilbccodec-i386-apple-darwin12.2.0",
+					"-lportaudio-i386-apple-darwin12.2.0",
+					"-lpj-i386-apple-darwin12.2.0",
 				);
 				PRODUCT_NAME = Telephone;
 			};
@@ -1346,14 +1348,16 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
+				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -1361,13 +1365,14 @@
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
-				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application: Alexei Kuznetsov";
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
 			};
 			name = Release;

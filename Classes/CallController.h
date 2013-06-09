@@ -46,42 +46,19 @@ extern NSString * const AKCallWindowWillCloseNotification;
 
 // A call controller.
 @interface CallController : XSWindowController {
-  @private
-    NSString *identifier_;
-    AKSIPCall *call_;
-    AccountController *accountController_;
-    CallTransferController *callTransferController_;
-    
-    IncomingCallViewController *incomingCallViewController_;
-    
-    NSManagedObjectContext *moc_;
-    CallLog *callLog_;
   @protected
-    ActiveCallViewController *activeCallViewController_;
-    EndedCallViewController *endedCallViewController_;
-    
-  @private
-    NSString *displayedName_;
-    NSString *status_;
-    NSString *nameFromAddressBook_;
-    NSString *phoneLabelFromAddressBook_;
-    NSString *enteredCallDestination_;
-    AKSIPURI *redialURI_;
-    NSTimer *intermediateStatusTimer_;
-    NSTimeInterval callStartTime_;
-    BOOL callOnHold_;
-    BOOL callActive_;
-    BOOL callUnhandled_;
+    ActiveCallViewController *_activeCallViewController;
+    EndedCallViewController *_endedCallViewController;
 }
 
 // The receiver's identifier.
 @property (nonatomic, copy) NSString *identifier;
 
 // Call controlled by the receiver.
-@property (nonatomic, retain) AKSIPCall *call;
+@property (nonatomic, strong) AKSIPCall *call;
 
 // Account controller the receiver belongs to.
-@property (nonatomic, assign) AccountController *accountController;
+@property (nonatomic, weak) AccountController *accountController;
 
 // Call transfer controller.
 @property (nonatomic, readonly) CallTransferController *callTransferController;
@@ -91,10 +68,10 @@ extern NSString * const AKCallWindowWillCloseNotification;
 @property (nonatomic, readonly) IncomingCallViewController *incomingCallViewController;
 
 // Active call view controller.
-@property (nonatomic, readonly) ActiveCallViewController *activeCallViewController;
+@property (nonatomic, readonly, strong) ActiveCallViewController *activeCallViewController;
 
 // Ended call view controller.
-@property (nonatomic, readonly) EndedCallViewController *endedCallViewController;
+@property (nonatomic, readonly, strong) EndedCallViewController *endedCallViewController;
 
 
 // Remote party dislpay name.
@@ -117,7 +94,7 @@ extern NSString * const AKCallWindowWillCloseNotification;
 
 // Timer to display intermediate call status. This status appears for the short period of time and then is being
 // replaced with the current call status.
-@property (nonatomic, assign) NSTimer *intermediateStatusTimer;
+@property (nonatomic, strong) NSTimer *intermediateStatusTimer;
 
 // Call start time.
 @property (nonatomic, assign) NSTimeInterval callStartTime;
@@ -131,6 +108,9 @@ extern NSString * const AKCallWindowWillCloseNotification;
 // A Boolean value indicating whether the receiver's call is unhandled.
 @property (nonatomic, assign, getter=isCallUnhandled) BOOL callUnhandled;
 
+@property (nonatomic, strong) NSManagedObjectContext *moc;
+
+@property (strong) CallLog *callLog;
 
 // Designated initializer.
 // Initializes a CallController object with a given nib file and account controller.

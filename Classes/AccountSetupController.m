@@ -39,36 +39,10 @@ NSString * const AKAccountSetupControllerDidAddAccountNotification = @"AKAccount
 
 @implementation AccountSetupController
 
-@synthesize fullNameField = fullNameField_;
-@synthesize domainField = domainField_;
-@synthesize usernameField = usernameField_;
-@synthesize passwordField = passwordField_;
-@synthesize fullNameInvalidDataView = fullNameInvalidDataView_;
-@synthesize domainInvalidDataView = domainInvalidDataView_;
-@synthesize usernameInvalidDataView = usernameInvalidDataView_;
-@synthesize passwordInvalidDataView = passwordInvalidDataView_;
-@synthesize defaultButton = defaultButton_;
-@synthesize otherButton = otherButton_;
-
 - (id)init {
     self = [super initWithWindowNibName:@"AccountSetup"];
     
     return self;
-}
-
-- (void)dealloc {
-    [fullNameField_ release];
-    [domainField_ release];
-    [usernameField_ release];
-    [passwordField_ release];
-    [fullNameInvalidDataView_ release];
-    [domainInvalidDataView_ release];
-    [usernameInvalidDataView_ release];
-    [passwordInvalidDataView_ release];
-    [defaultButton_ release];
-    [otherButton_ release];
-    
-    [super dealloc];
 }
 
 - (IBAction)closeSheet:(id)sender {
