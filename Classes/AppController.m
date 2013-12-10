@@ -290,6 +290,8 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
     [self setShouldRestartUserAgentASAP:NO];
     [self setTerminating:NO];
     [self setDidPauseITunes:NO];
+    [self setDidPauseRadio:NO];
+    [self setDidPauseRdio:NO];
     [self setShouldPresentUserAgentLaunchError:NO];
     
     NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
@@ -684,10 +686,34 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
     [NSApp requestUserAttention:NSInformationalRequest];
 }
 
+enum RdioEPSS {
+	RdioEPSSPaused = 'kPSp',
+	RdioEPSSPlaying = 'kPSP',
+	RdioEPSSStopped = 'kPSS'
+};
+typedef enum RdioEPSS RdioEPSS;
 
 - (void)pauseITunes {
     if (![[NSUserDefaults standardUserDefaults] boolForKey:kPauseITunes]) {
         return;
+    }
+    
+    SBApplication *radio = [SBApplication applicationWithBundleIdentifier:@"ca.pjer.Radio"];
+    if ([radio isRunning]) {
+        BOOL r = [radio performSelector:NSSelectorFromString(@"isPlaying")];
+        if (r) {
+            [radio performSelector:NSSelectorFromString(@"pause")];
+            self.didPauseRadio = YES;
+        }
+    }
+
+    SBApplication *rdio = [SBApplication applicationWithBundleIdentifier:@"com.rdio.desktop"];
+    if ([rdio isRunning]) {
+        NSUInteger state = [rdio performSelector:NSSelectorFromString(@"playerState")];
+        if (state == RdioEPSSPlaying) {
+            [rdio performSelector:NSSelectorFromString(@"playpause")];
+            self.didPauseRdio = YES;
+        }
     }
     
     iTunesApplication *iTunes = [SBApplication applicationWithBundleIdentifier:@"com.apple.iTunes"];
@@ -705,6 +731,24 @@ static void NameserversChanged(SCDynamicStoreRef store, CFArrayRef changedKeys, 
 - (void)resumeITunesIfNeeded {
     if (![[NSUserDefaults standardUserDefaults] boolForKey:kPauseITunes]) {
         return;
+    }
+    
+    SBApplication *radio = [SBApplication applicationWithBundleIdentifier:@"ca.pjer.Radio"];
+    if ([radio isRunning] && self.didPauseRadio && ![self hasActiveCallControllers]) {
+        BOOL r = [radio performSelector:NSSelectorFromString(@"isPaused")];
+        if (r) {
+            [radio performSelector:@selector(play)];
+        }
+        self.didPauseRadio = NO;
+    }
+    
+    SBApplication *rdio = [SBApplication applicationWithBundleIdentifier:@"com.rdio.desktop"];
+    if ([rdio isRunning] && self.didPauseRdio && ![self hasActiveCallControllers]) {
+        NSUInteger state = [rdio performSelector:NSSelectorFromString(@"playerState")];
+        if (state == RdioEPSSPaused) {
+            [rdio performSelector:NSSelectorFromString(@"playpause")];
+        }
+        self.didPauseRdio = NO;
     }
     
     iTunesApplication *iTunes = [SBApplication applicationWithBundleIdentifier:@"com.apple.iTunes"];
